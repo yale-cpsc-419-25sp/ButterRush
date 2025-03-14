@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Login</title>
+</head>
+
+<body>
+    <h1>Student Login</h1>
+    <br>
+
+    {{error_msg}}
+    <br>
+    
+    <form action="u_login_submit" method="get">
+        <label for="uname">Username:</label>
+        <input type="text" name="uname" value="{{username}}">
+
+        <label for="pword" style="margin-left: 20px">Password:</label>
+        <input type="text" name="pword" value="{{password}}">
+
+        <input type="submit" value="Enter" style="margin-left: 20px">
+    </form>
+</body>
+
+</html>

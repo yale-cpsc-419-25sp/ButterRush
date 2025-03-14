@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Buttery Menu</title>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/u_butteries">Butteries</a>
+        <a href="/u_ordersIP">Orders in progress</a>
+        <a href="/u_cart">Cart</a>
+        <a href="/u_account">Account</a>
+    </div>
+    <br>
+
+    <h1>Davenport</h1>
+    <br>
+
+    <!-- lowkey, def start using JS for this? -->
+    {% for menuItem in menuItems %} 
+    <form action="u_display_item" method="get">
+        <input type="submit" name="menu_item" value="{{menuItem}}" style="margin-left: 20px">
+    </form>
+    <br>
+    {% endfor %}
+</body>
+
+</html>
