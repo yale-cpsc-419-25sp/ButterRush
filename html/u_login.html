@@ -11,15 +11,20 @@
 
     {{error_msg}}
     <br>
-    
+
+    <a href="/">Go back</a>
+    <br>
+
     <form action="u_login_submit" method="get">
         <label for="uname">Username:</label>
         <input type="text" name="uname" value="{{username}}">
+        <br>
 
-        <label for="pword" style="margin-left: 20px">Password:</label>
+        <label for="pword">Password:</label>
         <input type="text" name="pword" value="{{password}}">
+        <br>
 
-        <input type="submit" value="Enter" style="margin-left: 20px">
+        <input type="submit" value="Enter">
     </form>
 </body>
 

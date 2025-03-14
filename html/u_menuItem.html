@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Buttery Menu</title>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/u_butteries">Butteries</a>
+        <a href="/u_ordersIP">Orders in progress</a>
+        <a href="/u_cart">Cart</a>
+        <a href="/u_account">Account</a>
+    </div>
+    <br>
+
+    <form action="u_get_buttery_menu" method="get">
+        <input type="submit" name="buttery" value="{{buttery}}">
+    </form>
+
+    <h2>{{menuItem}}</h2>
+    <br>
+
+    <ul>
+        {% for ingredient in ingredients %} 
+        <li>{{ingredient}}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- add to cart fxnality here -->
+    <button>Add to cart</button>
+
+    <br>
+</body>
+
+</html>

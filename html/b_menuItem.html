@@ -7,12 +7,15 @@
 
 <body>
     <div class="header">
-        <a href="/u_butteries">Butteries</a>
-        <a href="/u_ordersIP">Orders in progress</a>
-        <a href="/u_cart">Cart</a>
-        <a href="/u_account">Account</a>
+        <a href="/b_myButtery">My buttery</a>
+        <a href="/b_orderQueue">Order queue</a>
+        <a href="/b_account">Account</a>
     </div>
     <br>
+
+    <form action="b_myButtery" method="get">
+        <input type="submit" name="buttery" value="{{buttery}}">
+    </form>
 
     <h2>{{menuItem}}</h2>
     <br>
@@ -23,8 +26,7 @@
         {% endfor %}
     </ul>
 
-    <!-- add to cart fxnality here -->
-    <button>Add to cart</button>
+    <button>Edit ingredients</button>
 
     <br>
 </body>

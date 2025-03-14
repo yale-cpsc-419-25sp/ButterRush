@@ -14,13 +14,14 @@
     </div>
     <br>
 
-    <h1>Davenport</h1>
+    <h1>{{buttery}}</h1>
     <br>
 
     <!-- lowkey, def start using JS for this? -->
     {% for menuItem in menuItems %} 
     <form action="u_display_item" method="get">
-        <input type="submit" name="menu_item" value="{{menuItem}}" style="margin-left: 20px">
+        <input type="submit" name="menu_item" value="{{menuItem}}">
+        <input type="hidden" name="buttery" value="{{buttery}}">
     </form>
     <br>
     {% endfor %}

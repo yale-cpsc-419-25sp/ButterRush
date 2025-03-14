@@ -16,9 +16,12 @@
 
     <!-- list of butteries -->
 
+    {% for buttery in butteries %}
     <form action="u_get_buttery_menu" method="get">
-        <input type="submit" value="Davenport">
+        <input type="submit" name="buttery" value="{{buttery}}">
     </form>
+    {% endfor %}
+
 </body>
 
 </html>

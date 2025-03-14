@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Buttery</title>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/b_myButtery">My buttery</a>
+        <a href="/b_orderQueue">Order queue</a>
+        <a href="/b_account">Account</a>
+    </div>
+    <br>
+
+    <h2>{{buttery}}</h2>
+    <br>
+
+    <button>Edit menu</button>  <!-- want to add this fxnality -->
+    <br>
+
+    {% for menuItem in menuItems %} 
+    <form action="b_display_item" method="get">
+        <input type="submit" name="menu_item" value="{{menuItem}}">
+    </form>
+    <br>
+    {% endfor %}
+
+</body>
+
+</html>
