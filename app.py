@@ -16,11 +16,11 @@ BUTTERY_MENU_DB = {"Davenport" : ["Quesadilla 1", "Quesadilla 2"],
 # ! this needs to have a buttery identifier
 MENU_ITEM_DB = {"Quesadilla 1" : ["Cheese", "Flour tortilla"], "Quesadilla 2" : ["Flour tortilla"]}
 
-# we can probably store things like cart items and orders in progress in variables
-cart = []
-ordersIP = []
-USERNAME = ""
-PASSWORD = ""
+# ! must use cookies for these bc diff users will be accessing the same server
+# cart = []
+# ordersIP = []
+# USERNAME = ""
+# PASSWORD = ""
 
 #-----------------------------------------------------------------------
 
@@ -103,10 +103,6 @@ def u_login_submit():
     response.set_cookie('username', username)  # apparently this is how to do this?
     response.set_cookie('password', password)
 
-    global USERNAME, PASSWORD
-    USERNAME = username
-    PASSWORD = password
-
     return response
 
 #-----------------------------------------------------------------------
@@ -164,7 +160,7 @@ def u_cart():
 
 @app.route('/u_account', methods=['GET'])  
 def u_account():
-    html = render_template('u_account.html', username=USERNAME)
+    html = render_template('u_account.html', username=request.cookies.get('username'))
     response = make_response(html)
     
     return response
@@ -233,19 +229,14 @@ def b_login_submit():
     response.set_cookie('username', username) 
     response.set_cookie('password', password)
 
-    global USERNAME
-    global PASSWORD
-    USERNAME = username
-    PASSWORD = password
-
     return response
 
 #-----------------------------------------------------------------------
 
 @app.route('/b_myButtery', methods=['GET'])  
 def b_myButtery():
-    html = render_template('b_myButtery.html', buttery=USERNAME,
-                           menuItems=BUTTERY_MENU_DB[USERNAME])  # ! kind of janky way to do it
+    html = render_template('b_myButtery.html', buttery=request.cookies.get('username'),
+                           menuItems=BUTTERY_MENU_DB[request.cookies.get('username')])  # ! kind of janky way to do it
     response = make_response(html)
 
     return response
@@ -256,7 +247,7 @@ def b_myButtery():
 def b_display_item():
     menu_item = request.args.get('menu_item')
     html = render_template('b_menuItem.html', ingredients=MENU_ITEM_DB[menu_item],
-                           buttery=USERNAME,
+                           buttery=request.cookies.get('username'),
                            menuItem=menu_item)
     response = make_response(html)
     
@@ -275,7 +266,7 @@ def b_orderQeue():
 
 @app.route('/b_account', methods=['GET']) 
 def b_account():
-    html = render_template('b_account.html', username=USERNAME)  # ! change all instances of USERNAME to request.cookies.get('username') ?
+    html = render_template('b_account.html', username=request.cookies.get('username')) 
     response = make_response(html)
     
     return response
@@ -283,11 +274,7 @@ def b_account():
 
 @app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
 def logout():
-    # clear vars
-    global USERNAME, PASSWORD
-    USERNAME = ''
-    PASSWORD = ''
-
+    # clear cookies
     html = redirect(url_for("home"))
     response = make_response(html)
     response.set_cookie('username', '')
