@@ -45,6 +45,29 @@ def home():
 # USER SIDE
 #-----------------------------------------------------------------------
 
+@app.route('/u_createAccount', methods=['GET', 'POST'])
+def u_createAccount():
+    if request.method == "POST":
+        username = request.form["uname"]
+        password = request.form["pword"]
+        if not (username and password):
+            return render_template('u_createAccount.html', message="Username and password are required.", user=username, pwd=password)
+        if username in USERNAME_PASSWORD_DB:
+            return render_template('u_createAccount.html', message="This username already exists. Please choose a different username.", user=username, pwd=password)
+        
+        USERNAME_PASSWORD_DB[username] = password
+        response = make_response(redirect("/u_butteries"))
+        response.set_cookie('username', username)
+        response.set_cookie('password', password)
+        return response
+  
+    html = render_template('u_createAccount.html')
+    response = make_response(html)
+    
+    return response
+
+#-----------------------------------------------------------------------
+
 # ! apparently there is a Flask-Login extension that can handle this?
 # change this in future
 @app.route('/u_login', methods=['GET'])
@@ -74,7 +97,7 @@ def u_login():
 
 #-----------------------------------------------------------------------
 
-@app.route('/u_login_submit', methods=['GET'])  
+@app.route('/u_login_submit', methods=['GET'])   # could this just be done in u_login?
 def u_login_submit():
 
     username = request.args.get('uname')
@@ -95,7 +118,7 @@ def u_login_submit():
 
     elif USERNAME_PASSWORD_DB[username] != password:
         response = redirect(url_for('u_login'))
-        error_msg = 'Password incorrect. You get [] more tries.'
+        error_msg = 'Incorrect password.'# You get [] more tries.'
         response.set_cookie('error_msg', error_msg)
 
     else:

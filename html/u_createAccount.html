@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Create User Account</title>
+    <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
+</head>
+<body>
+    <a href="/u_login">Back to Login Page</a>
+    <h1>Create New User Account</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <form action="" method="post">
+        <label for="uname">New Username:</label>
+        <input type="text" name="uname" value="{{ user }}">
+        <br/>
+
+        <label for="pword" >New Password:</label>
+        <input type="password" name="pword" value="{{ pwd }}" id="password">
+        <br/>
+
+        <div style="display: inline-block">
+            <input style="display: inline" type="checkbox" onclick="toggleShowPwd()">
+            <p style="display: inline">Show password</p>
+        </div>
+        <br/>
+
+        <input type="submit" value="Enter">
+    </form>
+</body>
+</html>
