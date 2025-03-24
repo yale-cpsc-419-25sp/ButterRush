@@ -14,7 +14,23 @@
     </div>
     <br>
 
-    Under construction.
+    <h2>Your Cart</h2>
+    <ul>
+        {% for item in cart %}
+            <li>
+                {{item.menu_item}} from {{item.buttery}}
+                <form action="/u_remove_from_cart" method="post">
+                    <input type="hidden" name="index" value="{{loop.index0}}">
+                    <button type="submit">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <form action="/u_submit_order" method="post">
+        <button type="submit">Buy</button>
+    </form>
+    
+    
 </body>
 
 </html>

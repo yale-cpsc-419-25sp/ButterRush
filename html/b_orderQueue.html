@@ -13,7 +13,18 @@
     </div>
     <br>
 
-    Under construction.
+    <h2>Orders in Queue</h2>
+    <ul>
+        {% for order in orders %}
+            <li>
+                {{order.menu_item}} (user: {{order.user}})
+                <form action="/b_remove_from_queue" method="get">
+                    <input type="hidden" name="order_id" value="{{order.id}}">
+                    <button type="submit">Done</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
 
 </body>
 

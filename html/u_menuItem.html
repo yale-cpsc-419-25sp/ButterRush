@@ -28,7 +28,11 @@
     </ul>
 
     <!-- add to cart fxnality here -->
-    <button>Add to cart</button>
+    <form action="/u_add_to_cart" method="post">
+        <input type="hidden" name="buttery" value="{{buttery}}">
+        <input type="hidden" name="menu_item" value="{{menuItem}}">
+        <button type="submit">Add to cart</button>
+    </form>    
 
     <br>
 </body>
