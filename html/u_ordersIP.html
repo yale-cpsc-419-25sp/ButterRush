@@ -14,7 +14,12 @@
     </div>
     <br>
     
-    Under construction.
+    <h2>Orders in Progress</h2>
+    <ul>
+        {% for order in orders %}
+            <li>{{order}}</li>
+        {% endfor %}
+    </ul>
 
 </body>
 

@@ -20,7 +20,7 @@ MENU_ITEM_DB = {"Quesadilla 1" : ["Cheese", "Flour tortilla"], "Quesadilla 2" : 
 BUTTERY_ORDERS_DB = {"Davenport":[], "Morse":[], "Stiles":[]}
 # ! must use cookies for these bc diff users will be accessing the same server
 # cart = []
-ordersIP = []
+ordersIP = {}
 # USERNAME = ""
 # PASSWORD = ""
 
@@ -139,6 +139,7 @@ def u_display_item():
     response = make_response(html)
     
     return response
+
 #-----------------------------------------------------------------------
 
 @app.route('/u_add_to_cart', methods=['POST'])
@@ -183,7 +184,6 @@ def u_remove_from_cart():
     if 0 <= index < len(cart):
         cart.pop(index)
 
-    # Save updated cart
     response = make_response(redirect(url_for('u_cart')))
     response.set_cookie('cart', json.dumps(cart))
     return response
@@ -196,20 +196,21 @@ def u_submit_order():
     cart = json.loads(cart_cookie) if cart_cookie else []
 
     for item in cart:
-        # ordersIP.append(item)
+        username = request.cookies.get('username')
+        if username not in ordersIP:
+            ordersIP[username] = []
+        ordersIP[username].append(item['menu_item'])   
+
         buttery = item['buttery']
-        print("hello")
-        print(buttery)
         if buttery not in BUTTERY_ORDERS_DB:
             BUTTERY_ORDERS_DB[buttery] = []
 
         BUTTERY_ORDERS_DB[buttery].append({
             "menu_item": item['menu_item'],
-            "user": request.cookies.get('username')
+            "user": username
         })
-    
-    # response = make_response(redirect('/u_ordersIP'))  
-    response = make_response(redirect(url_for('u_butteries')))  
+
+    response = make_response(redirect(url_for('u_ordersIP')))
     response.set_cookie('cart', '', expires=0) # reset cart
     return response
 
@@ -217,19 +218,10 @@ def u_submit_order():
 
 @app.route('/u_ordersIP', methods=['GET'])  
 def u_ordersIP():
-    html = render_template('u_ordersIP.html', orders=ordersIP)
+    html = render_template('u_ordersIP.html', orders=ordersIP[request.cookies.get('username')])
     response = make_response(html)
     
     return response
-
-#-----------------------------------------------------------------------
-
-# @app.route('/u_cart', methods=['GET'])  
-# def u_cart():
-#     html = render_template('u_cart.html')
-#     response = make_response(html)
-    
-#     return response
 
 #-----------------------------------------------------------------------
 
@@ -332,7 +324,7 @@ def b_display_item():
 
 @app.route('/b_orderQueue', methods=['GET']) 
 def b_orderQueue():
-    orders = BUTTERY_ORDERS_DB[request.cookies.get('username')]
+    orders = BUTTERY_ORDERS_DB[request.cookies.get('username')] # temp soln bc username for buttery login is buttery name
     html = render_template('b_orderQueue.html', orders=orders)
     response = make_response(html)
     
