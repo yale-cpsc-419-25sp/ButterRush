@@ -1,6 +1,7 @@
 """ Module for our Flask app """
 
 from flask import Flask, request, make_response, redirect, url_for, render_template
+import json
 # import requests
 
 # ! should there be 2 separate apps for user and buttery
@@ -16,9 +17,10 @@ BUTTERY_MENU_DB = {"Davenport" : ["Quesadilla 1", "Quesadilla 2"],
 # ! this needs to have a buttery identifier
 MENU_ITEM_DB = {"Quesadilla 1" : ["Cheese", "Flour tortilla"], "Quesadilla 2" : ["Flour tortilla"]}
 
+BUTTERY_ORDERS_DB = {"Davenport":[], "Morse":[], "Stiles":[]}
 # ! must use cookies for these bc diff users will be accessing the same server
 # cart = []
-# ordersIP = []
+ordersIP = []
 # USERNAME = ""
 # PASSWORD = ""
 
@@ -137,6 +139,79 @@ def u_display_item():
     response = make_response(html)
     
     return response
+#-----------------------------------------------------------------------
+
+@app.route('/u_add_to_cart', methods=['POST'])
+def u_add_to_cart():
+    buttery = request.form.get('buttery')
+    menu_item = request.form.get('menu_item')
+
+    cart_cookie = request.cookies.get('cart')
+    if cart_cookie:
+        cart = json.loads(cart_cookie)
+    else:
+        cart = []
+
+    cart.append({'buttery': buttery, 'menu_item': menu_item})
+
+    response = make_response(redirect(url_for('u_cart')))  
+    response.set_cookie('cart', json.dumps(cart))  # re-store as cookie
+    return response
+
+#-----------------------------------------------------------------------
+
+@app.route('/u_cart', methods=['GET'])
+def u_cart():
+    cart_cookie = request.cookies.get('cart')
+    cart = json.loads(cart_cookie) if cart_cookie else []
+
+    html = render_template('u_cart.html', cart=cart)
+    response = make_response(html)
+
+    return response
+
+#-----------------------------------------------------------------------
+
+@app.route('/u_remove_from_cart', methods=['POST'])
+def u_remove_from_cart():
+    index = int(request.form.get('index'))
+
+    cart_cookie = request.cookies.get('cart')
+    cart = json.loads(cart_cookie) if cart_cookie else []
+
+    # remove item if index is valid
+    if 0 <= index < len(cart):
+        cart.pop(index)
+
+    # Save updated cart
+    response = make_response(redirect(url_for('u_cart')))
+    response.set_cookie('cart', json.dumps(cart))
+    return response
+
+#-----------------------------------------------------------------------
+
+@app.route('/u_submit_order', methods=['POST'])
+def u_submit_order():
+    cart_cookie = request.cookies.get('cart')
+    cart = json.loads(cart_cookie) if cart_cookie else []
+
+    for item in cart:
+        # ordersIP.append(item)
+        buttery = item['buttery']
+        print("hello")
+        print(buttery)
+        if buttery not in BUTTERY_ORDERS_DB:
+            BUTTERY_ORDERS_DB[buttery] = []
+
+        BUTTERY_ORDERS_DB[buttery].append({
+            "menu_item": item['menu_item'],
+            "user": request.cookies.get('username')
+        })
+    
+    # response = make_response(redirect('/u_ordersIP'))  
+    response = make_response(redirect(url_for('u_butteries')))  
+    response.set_cookie('cart', '', expires=0) # reset cart
+    return response
 
 #-----------------------------------------------------------------------
 
@@ -149,12 +224,12 @@ def u_ordersIP():
 
 #-----------------------------------------------------------------------
 
-@app.route('/u_cart', methods=['GET'])  
-def u_cart():
-    html = render_template('u_cart.html')
-    response = make_response(html)
+# @app.route('/u_cart', methods=['GET'])  
+# def u_cart():
+#     html = render_template('u_cart.html')
+#     response = make_response(html)
     
-    return response
+#     return response
 
 #-----------------------------------------------------------------------
 
@@ -256,8 +331,9 @@ def b_display_item():
 #-----------------------------------------------------------------------
 
 @app.route('/b_orderQueue', methods=['GET']) 
-def b_orderQeue():
-    html = render_template('b_orderQueue.html')
+def b_orderQueue():
+    orders = BUTTERY_ORDERS_DB[request.cookies.get('username')]
+    html = render_template('b_orderQueue.html', orders=orders)
     response = make_response(html)
     
     return response
