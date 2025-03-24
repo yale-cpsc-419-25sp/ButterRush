@@ -18,9 +18,11 @@ BUTTERY_MENU_DB = {"Davenport" : ["Quesadilla 1", "Quesadilla 2"],
 MENU_ITEM_DB = {"Quesadilla 1" : ["Cheese", "Flour tortilla"], "Quesadilla 2" : ["Flour tortilla"]}
 
 BUTTERY_ORDERS_DB = {"Davenport":[], "Morse":[], "Stiles":[]}
+STUDENT_ORDERS_DB = {}
 # ! must use cookies for these bc diff users will be accessing the same server
 # cart = []
 ordersIP = {}
+ID = 0
 # USERNAME = ""
 # PASSWORD = ""
 
@@ -197,9 +199,16 @@ def u_submit_order():
 
     for item in cart:
         username = request.cookies.get('username')
-        if username not in ordersIP:
-            ordersIP[username] = []
-        ordersIP[username].append(item['menu_item'])   
+
+        if username not in STUDENT_ORDERS_DB:
+            STUDENT_ORDERS_DB[username] = []
+            
+        id = ID + 1
+        STUDENT_ORDERS_DB[username].append({
+            "menu_item": item['menu_item'], 
+            "id": id,
+            "status": "pending"
+        })
 
         buttery = item['buttery']
         if buttery not in BUTTERY_ORDERS_DB:
@@ -207,7 +216,8 @@ def u_submit_order():
 
         BUTTERY_ORDERS_DB[buttery].append({
             "menu_item": item['menu_item'],
-            "user": username
+            "user": username,
+            "id": id
         })
 
     response = make_response(redirect(url_for('u_ordersIP')))
@@ -218,7 +228,7 @@ def u_submit_order():
 
 @app.route('/u_ordersIP', methods=['GET'])  
 def u_ordersIP():
-    html = render_template('u_ordersIP.html', orders=ordersIP[request.cookies.get('username')])
+    html = render_template('u_ordersIP.html', orders=STUDENT_ORDERS_DB[request.cookies.get('username')])
     response = make_response(html)
     
     return response
@@ -325,6 +335,32 @@ def b_display_item():
 @app.route('/b_orderQueue', methods=['GET']) 
 def b_orderQueue():
     orders = BUTTERY_ORDERS_DB[request.cookies.get('username')] # temp soln bc username for buttery login is buttery name
+    html = render_template('b_orderQueue.html', orders=orders)
+    response = make_response(html)
+    
+    return response
+
+#-----------------------------------------------------------------------
+
+@app.route('/b_remove_from_queue', methods=['GET']) 
+def b_remove_from_queue():
+    order_id = request.args.get('order_id')
+
+    # this is why we need a relational db lol so inefficient - seb
+    # remove from buttery order db
+    buttery = request.cookies.get('username')
+    for order in BUTTERY_ORDERS_DB[buttery]:
+        if str(order['id']) == order_id:
+            BUTTERY_ORDERS_DB[buttery].remove(order)
+            break
+    orders = BUTTERY_ORDERS_DB[request.cookies.get('username')]
+
+    # update status in student order db
+    for student in STUDENT_ORDERS_DB:
+        for order in STUDENT_ORDERS_DB[student]:
+            if str(order['id']) == order_id:
+                order['status'] = "ready"
+
     html = render_template('b_orderQueue.html', orders=orders)
     response = make_response(html)
     

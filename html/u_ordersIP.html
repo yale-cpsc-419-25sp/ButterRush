@@ -17,10 +17,15 @@
     <h2>Orders in Progress</h2>
     <ul>
         {% for order in orders %}
-            <li>{{order}}</li>
+            <li>{{order.menu_item}} (status: {{order.status}})</li>
         {% endfor %}
     </ul>
 
+    <script>
+        setInterval(function() {
+          location.reload();
+        }, 10000); 
+      </script>   
 </body>
 
 </html>
