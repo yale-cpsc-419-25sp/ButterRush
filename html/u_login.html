@@ -3,6 +3,7 @@
 
 <head>
     <title>Student Login</title>
+    <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
 </head>
 
 <body>
@@ -21,11 +22,18 @@
         <br>
 
         <label for="pword">Password:</label>
-        <input type="text" name="pword" value="{{password}}">
+        <input type="password" name="pword" value="{{password}}" id="password">
         <br>
+
+        <div style="display: inline-block">
+            <input style="display: inline" type="checkbox" onclick="toggleShowPwd()">
+            <p style="display: inline">Show password</p>
+        </div>
+        <br/>
 
         <input type="submit" value="Enter">
     </form>
+    <p> Don't have an account? <a href="/u_createAccount">Sign Up</a></p>
 </body>
 
 </html>
