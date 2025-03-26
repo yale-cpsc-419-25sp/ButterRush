@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Orders in progress</title>
+    <title>Orders in Progress</title>
 </head>
 
 <body>
@@ -15,17 +15,41 @@
     <br>
     
     <h2>Orders in Progress</h2>
-    <ul>
+    {% if orders %}
         {% for order in orders %}
-            <li>{{order.menu_item}} (status: {{order.status}})</li>
+            <div class="order">
+                <h3>Order #{{ order.order_id }}</h3>
+                <p>From: {{ order.buttery.buttery_name }}</p>
+                <p>Status: {{ order.status }}</p>
+                <p>Total: ${{ "%.2f"|format(order.total_price) }}</p>
+                <p>Ordered: {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                
+                <h4>Items:</h4>
+                <ul>
+                    {% for item in order.order_items %}
+                        <li>
+                            {{ item.quantity }}x {{ item.menu_item.item_name }}
+                            {% if item.note %}
+                                (Note: {{ item.note }})
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                {% if order.delivery_address %}
+                    <p>Delivery to: {{ order.delivery_address }}</p>
+                {% endif %}
+            </div>
         {% endfor %}
-    </ul>
+    {% else %}
+        <p>No orders in progress</p>
+    {% endif %}
 
     <script>
         setInterval(function() {
-          location.reload();
-        }, 10000); 
-      </script>   
+            location.reload();
+        }, 10000); // Refresh every 10 seconds
+    </script>
 </body>
 
 </html>
