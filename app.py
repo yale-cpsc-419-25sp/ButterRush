@@ -305,7 +305,8 @@ def u_submit_order():
             order_id=new_order.order_id,
             menu_item_id=menu_item.menu_item_id,
             quantity=item['quantity'],
-            item_price=item['menu_item']['price']
+            item_price=item['menu_item']['price'],
+            note=item.get('note', '')  # Add the note from cart item
         )
         total_price += item['menu_item']['price'] * item['quantity']
         db.session.add(order_item)
@@ -329,7 +330,7 @@ def u_ordersIP():
     orders = Order.query.filter_by(
         user_id=user_id
     ).filter(
-        Order.status.in_(['pending', 'in_progress'])
+        Order.status.in_(['pending', 'ready'])
     ).all()
     
     # Format orders for template
@@ -355,10 +356,7 @@ def u_ordersIP():
             'order_date': order.order_date
         })
     
-    html = render_template('u_ordersIP.html', orders=formatted_orders)
-    response = make_response(html)
-    
-    return response
+    return render_template('u_ordersIP.html', orders=formatted_orders)
 
 #-----------------------------------------------------------------------
 
@@ -498,10 +496,11 @@ def b_orderQueue():
     if not buttery:
         return redirect(url_for('b_login'))
     
-    # Get pending orders for this buttery
+    # Get orders that are pending or ready (not picked up)
     orders = Order.query.filter_by(
-        buttery_id=buttery.buttery_id,
-        status='pending'
+        buttery_id=buttery.buttery_id
+    ).filter(
+        Order.status.in_(['pending', 'ready'])
     ).all()
     
     # Format orders for template
@@ -516,73 +515,30 @@ def b_orderQueue():
                 'note': item.note
             })
         
-        # Get the username from the user relationship
         user = User.query.get(order.user_id)
         username = user.username if user else 'Unknown User'
         
         formatted_orders.append({
             'id': order.order_id,
-            'username': username,  # Add username to the formatted order
+            'username': username,
             'order_items': order_items,
             'status': order.status,
             'total_price': float(order.total_price)
         })
     
-    html = render_template('b_orderQueue.html', orders=formatted_orders)
-    response = make_response(html)
-    
-    return response
+    return render_template('b_orderQueue.html', orders=formatted_orders)
 
-#-----------------------------------------------------------------------
-
-@app.route('/b_remove_from_queue', methods=['GET']) 
-def b_remove_from_queue():
-    order_id = request.args.get('order_id')
+@app.route('/b_update_order_status', methods=['POST'])
+def b_update_order_status():
+    order_id = request.form.get('order_id')
+    new_status = request.form.get('status')
     
-    try:
-        # Update order status in database
-        order = Order.query.get(order_id)
-        if order:
-            order.status = 'completed'  # or 'ready' depending on your status options
-            db.session.commit()
-            
-            # Get updated orders for the buttery
-            buttery_name = request.cookies.get('username')
-            buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-            orders = Order.query.filter_by(
-                buttery_id=buttery.buttery_id,
-                status='pending'
-            ).all()
-            
-            # Format orders for template
-            formatted_orders = []
-            for order in orders:
-                order_items = []
-                for item in order.order_items:
-                    menu_item = MenuItem.query.get(item.menu_item_id)
-                    order_items.append({
-                        'name': menu_item.item_name,
-                        'quantity': item.quantity,
-                        'note': item.note
-                    })
-                
-                formatted_orders.append({
-                    'id': order.order_id,
-                    'items': order_items,
-                    'status': order.status,
-                    'total_price': float(order.total_price)
-                })
-            
-            html = render_template('b_orderQueue.html', orders=formatted_orders)
-            response = make_response(html)
-            return response
-        
-        return "Order not found", 404
-        
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error updating order: {str(e)}")
-        return "Error updating order", 500
+    order = Order.query.get(order_id)
+    if order:
+        order.status = new_status
+        db.session.commit()
+    
+    return redirect(url_for('b_orderQueue'))
 
 #-----------------------------------------------------------------------
 
