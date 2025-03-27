@@ -62,12 +62,12 @@ def u_createAccount():
             return render_template('u_createAccount.html', 
                                 message="All fields are required.",
                                 user=username)
-        
-        if User.query.filter_by(username=username).first():
-            return render_template('u_createAccount.html',
-                                message="Username already exists.",
-                                user=username)
-        
+
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            return render_template('u_createAccount.html', 
+                                message="An account with this email already exists")
+
         new_user = User(
             username=username,
             password_hash=password,  # Should use proper hashing
