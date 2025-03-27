@@ -341,14 +341,15 @@ def u_ordersIP():
             order_items.append({
                 'name': menu_item.item_name,
                 'quantity': item.quantity,
-                'note': item.note
+                'note': item.note,
+                'item_price': item.item_price
             })
         
         buttery = Buttery.query.get(order.buttery_id)
         formatted_orders.append({
             'id': order.order_id,
             'buttery': buttery.buttery_name,
-            'items': order_items,
+            'order_items': order_items,
             'status': order.status,
             'total_price': float(order.total_price),
             'order_date': order.order_date
@@ -515,9 +516,14 @@ def b_orderQueue():
                 'note': item.note
             })
         
+        # Get the username from the user relationship
+        user = User.query.get(order.user_id)
+        username = user.username if user else 'Unknown User'
+        
         formatted_orders.append({
             'id': order.order_id,
-            'items': order_items,
+            'username': username,  # Add username to the formatted order
+            'order_items': order_items,
             'status': order.status,
             'total_price': float(order.total_price)
         })

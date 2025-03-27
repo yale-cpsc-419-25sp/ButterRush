@@ -60,7 +60,7 @@ def init_db():
         
         quesadilla = MenuItem(
             buttery_id=davenport.buttery_id,
-            item_name='Quesadilla 1',
+            item_name='Quesadilla',
             description='Cheese quesadilla',
             price=2.50,
             category='Savory',

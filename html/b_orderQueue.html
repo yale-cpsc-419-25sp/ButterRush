@@ -14,20 +14,41 @@
     <br>
 
     <h2>Orders in Queue</h2>
-    <ul>
-        {% for order in orders %}
-            <li>
-                {{order.menu_item}} (user: {{order.username}})
-                {% if order.note %}
-                    <br>Note: {{order.note}}
-                {% endif %}
-                <form action="/b_remove_from_queue" method="get">
-                    <input type="hidden" name="order_id" value="{{order.id}}">
-                    <button type="submit">Done</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <div class="order-item">
+                    <div class="order-header">
+                        <h3>{{order.username}}</h3>
+                        <p>Status: {{order.status}}</p>
+                    </div>
+                    
+                    <ul>
+                        {% for item in order.order_items %}
+                            <li>
+                                {{item.quantity}}x {{item.name}}
+                                {% if item.note %}
+                                    <br>Note: {{item.note}}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <p>
+                        <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
+                    </p>
+                    
+                    <form action="/b_remove_from_queue" method="get">
+                        <input type="hidden" name="order_id" value="{{order.id}}">
+                        <button type="submit">Mark as Done</button>
+                    </form>
+                </div>
+                <hr>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No orders in queue.</p>
+    {% endif %}
 
 </body>
 

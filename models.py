@@ -76,7 +76,7 @@ class Order(db.Model):
     total_price = db.Column(db.Numeric(10,2), nullable=False)  # Total order cost
     status = db.Column(db.String, default='pending')  # Order status tracking
     
-    # Relationship to order items
+    # Change 'items' to 'order_items' to avoid conflict with built-in method
     order_items = db.relationship('OrderItem', backref='order', lazy=True)
 
 # Tracks individual items in an order

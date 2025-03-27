@@ -8,41 +8,38 @@
 <body>
     <div class="header">
         <a href="/u_butteries">Butteries</a>
-        <a href="/u_ordersIP">Orders in progress</a>
+        <a href="/u_ordersIP">Orders</a>
         <a href="/u_cart">Cart</a>
         <a href="/u_account">Account</a>
     </div>
     <br>
     
-    <h2>Orders in Progress</h2>
+    <h2>Your Orders</h2>
     {% if orders %}
-        {% for order in orders %}
-            <div class="order">
-                <h3>Order #{{ order.order_id }}</h3>
-                <p>From: {{ order.buttery.buttery_name }}</p>
-                <p>Status: {{ order.status }}</p>
-                <p>Total: ${{ "%.2f"|format(order.total_price) }}</p>
-                <p>Ordered: {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                
-                <h4>Items:</h4>
-                <ul>
-                    {% for item in order.order_items %}
-                        <li>
-                            {{ item.quantity }}x {{ item.menu_item.item_name }}
-                            {% if item.note %}
-                                (Note: {{ item.note }})
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-                
-                {% if order.delivery_address %}
-                    <p>Delivery to: {{ order.delivery_address }}</p>
-                {% endif %}
-            </div>
-        {% endfor %}
+        <ul>
+            {% for order in orders %}
+                <li>
+                    <h3>{{order.buttery}}</h3>
+                    <p>Status: {{order.status}}</p>
+                    
+                    <ul>
+                        {% for item in order.order_items %}
+                            <li>
+                                {{item.quantity}}x {{item.name}}
+                                (${{"{:.2f}".format(item.item_price)}} each)
+                                {% if item.note %}
+                                    <br><em>Note: {{item.note}}</em>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong></p>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
     {% else %}
-        <p>No orders in progress</p>
+        <p>No orders in progress.</p>
     {% endif %}
 
     <script>
