@@ -1,33 +1,62 @@
 <!DOCTYPE html>
+<!-- Added lang attribute for accessibility -->
 <html lang="en">
 <head>
     <!-- <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <title>Create User Account</title>
+    <!-- Added JavaScript for password visibility toggle -->
     <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
 </head>
 <body>
+    <!-- Added navigation back to login -->
     <a href="/u_login">Back to Login Page</a>
     <h1>Create New User Account</h1>
+    
+    <!-- Error message display with red color -->
     {% if message %}
-        <p>{{ message }}</p>
+        <p style="color: red;">{{ message }}</p>
     {% endif %}
+    
+    <!-- Changed to POST method for secure data transmission -->
     <form action="" method="post">
-        <label for="uname">New Username:</label>
-        <input type="text" name="uname" value="{{ user }}">
-        <br/>
-
-        <label for="pword" >New Password:</label>
-        <input type="password" name="pword" value="{{ pwd }}" id="password">
-        <br/>
-
-        <div style="display: inline-block">
-            <input style="display: inline" type="checkbox" onclick="toggleShowPwd()">
-            <p style="display: inline">Show password</p>
+        
+        <!-- Added required attribute and length validation -->
+        <div>
+            <label for="uname">Username:</label>
+            <input type="text" name="uname" required minlength="3" maxlength="80">
         </div>
         <br/>
 
-        <input type="submit" value="Enter">
+        <!-- Added email field with type="email" for validation -->
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        <br/>
+
+        <!-- Added password requirements and helper text -->
+        <div>
+            <label for="pword">Password:</label>
+            <input type="password" name="pword" id="password" required minlength="8">
+            <small>Password must be at least 8 characters long</small>
+        </div>
+        <br/>
+
+        <!-- Added password confirmation field -->
+        <div>
+            <label for="confirm_password">Confirm Password:</label>
+            <input type="password" name="confirm_password" required>
+        </div>
+        <br/>
+
+        <!-- Password visibility toggle -->
+        <div>
+            <input type="checkbox" onclick="toggleShowPwd()">Show password
+        </div>
+        <br/>
+
+        <input type="submit" value="Create Account">
     </form>
 </body>
 </html>

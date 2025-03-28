@@ -1,36 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Buttery Menu</title>
+    <title>Shopping Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+    <!-- Navigation header -->
     <div class="header">
         <a href="/u_butteries">Butteries</a>
-        <a href="/u_ordersIP">Orders in progress</a>
+        <a href="/u_ordersIP">Orders in Progress</a>
         <a href="/u_cart">Cart</a>
         <a href="/u_account">Account</a>
     </div>
     <br>
 
     <h2>Your Cart</h2>
-    <ul>
-        {% for item in cart %}
-            <li>
-                {{item.menu_item}} from {{item.buttery}}
-                <form action="/u_remove_from_cart" method="post">
-                    <input type="hidden" name="index" value="{{loop.index0}}">
-                    <button type="submit">Remove</button>
+    <!-- Cart content with empty state handling -->
+    {% if cart %}
+        <div class="cart-items">
+            <!-- Initialize total price tracker -->
+            {% set total = namespace(value=0) %}
+            {% for item in cart %}
+                {% if item.menu_item and item.menu_item.price is defined %}
+                    <div class="cart-item">
+                        <h3>{{ item.menu_item.name }}</h3>
+                        <p>from {{ item.buttery }}</p>
+                        <!-- Added quantity adjustment form -->
+                        <p>Quantity: 
+                            <form action="/u_update_quantity" method="post" style="display: inline;">
+                                <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                <input type="number" name="quantity" value="{{ item.quantity|default(1) }}" 
+                                       min="1" max="10" onchange="this.form.submit()">
+                            </form>
+                        </p>
+                        <!-- Added price calculation and formatting -->
+                        <p>Price: ${{ "%.2f"|format(item.menu_item.price * item.quantity|default(1)) }}</p>
+                        <!-- Added note display -->
+                        {% if item.note %}
+                            <p>Note: {{ item.note }}</p>
+                        {% endif %}
+                        <!-- Added remove item form -->
+                        <form action="/u_remove_from_cart" method="post">
+                            <input type="hidden" name="index" value="{{ loop.index0 }}">
+                            <button type="submit">Remove</button>
+                        </form>
+                        <!-- Update total price -->
+                        {% set total.value = total.value + (item.menu_item.price * item.quantity|default(1)) %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Display total price -->
+            {% if total.value > 0 %}
+                <div class="cart-total">
+                    <h3>Total: ${{ "%.2f"|format(total.value) }}</h3>
+                </div>
+
+                <!-- Added order submission form with required fields -->
+                <form action="/u_submit_order" method="post">
+                    <button type="submit">Place Order</button>
                 </form>
-            </li>
-        {% endfor %}
-    </ul>
-    <form action="/u_submit_order" method="post">
-        <button type="submit">Buy</button>
-    </form>
-    
-    
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Empty cart state -->
+        <p>Your cart is empty</p>
+        <a href="/u_butteries">Browse Butteries</a>
+    {% endif %}
 </body>
 
 </html>

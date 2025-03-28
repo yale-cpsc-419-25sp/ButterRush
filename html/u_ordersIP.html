@@ -2,30 +2,51 @@
 <html>
 
 <head>
-    <title>Orders in progress</title>
+    <title>Orders in Progress</title>
 </head>
 
 <body>
     <div class="header">
         <a href="/u_butteries">Butteries</a>
-        <a href="/u_ordersIP">Orders in progress</a>
+        <a href="/u_ordersIP">Orders</a>
         <a href="/u_cart">Cart</a>
         <a href="/u_account">Account</a>
     </div>
     <br>
     
-    <h2>Orders in Progress</h2>
-    <ul>
-        {% for order in orders %}
-            <li>{{order.menu_item}} (status: {{order.status}})</li>
-        {% endfor %}
-    </ul>
+    <h2>Your Orders</h2>
+    {% if orders %}
+        <ul>
+            {% for order in orders %}
+                <li>
+                    <h3>{{order.buttery}}</h3>
+                    <p>Status: {{order.status}}</p>
+                    
+                    <ul>
+                        {% for item in order.order_items %}
+                            <li>
+                                {{item.quantity}}x {{item.name}}
+                                (${{"{:.2f}".format(item.item_price)}} each)
+                                {% if item.note %}
+                                    <br><em>Note: {{item.note}}</em>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong></p>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No orders in progress.</p>
+    {% endif %}
 
     <script>
         setInterval(function() {
-          location.reload();
-        }, 10000); 
-      </script>   
+            location.reload();
+        }, 10000); // Refresh every 10 seconds
+    </script>
 </body>
 
 </html>
