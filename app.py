@@ -504,7 +504,7 @@ def b_orderQueue():
     ).all()
     
     # Format orders for template
-    formatted_orders = []
+    formatted_orders = [[], []] # pending & ready orders separately
     for order in orders:
         order_items = []
         for item in order.order_items:
@@ -518,11 +518,11 @@ def b_orderQueue():
         user = User.query.get(order.user_id)
         username = user.username if user else 'Unknown User'
         
-        formatted_orders.append({
+        status_index = 0 if order.status == 'pending' else 1
+        formatted_orders[status_index].append({
             'id': order.order_id,
             'username': username,
             'order_items': order_items,
-            'status': order.status,
             'total_price': float(order.total_price)
         })
     

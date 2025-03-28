@@ -14,9 +14,9 @@
     <br>
 
     <h2>Orders in Queue</h2>
-    {% if orders %}
+    {% if orders[0] %}
         <div class="orders-list">
-            {% for order in orders %}
+            {% for order in orders[0] %}
                 <div class="order-item">
                     <div class="order-header">
                         <h3>{{order.username}}</h3>
@@ -40,13 +40,8 @@
                     
                     <form action="/b_update_order_status" method="post">
                         <input type="hidden" name="order_id" value="{{order.id}}">
-                        {% if order.status == 'pending' %}
-                            <input type="hidden" name="status" value="ready">
-                            <button type="submit">Mark as Ready</button>
-                        {% elif order.status == 'ready' %}
-                            <input type="hidden" name="status" value="picked_up">
-                            <button type="submit">Mark as Picked Up</button>
-                        {% endif %}
+                        <input type="hidden" name="status" value="ready">
+                        <button type="submit">Mark as Ready</button>
                     </form>
                 </div>
                 <hr>
@@ -54,6 +49,42 @@
         </div>
     {% else %}
         <p>No orders in queue.</p>
+    {% endif %}
+
+    <h2>Waiting for Pickup</h2>
+    {% if orders[1] %}
+        <div class="orders-list">
+            {% for order in orders[1] %}
+                <div class="order-item">
+                    <div class="order-header">
+                        <h3>{{order.username}}</h3>
+                        <p>Status: {{order.status}}</p>
+                    </div>
+                    
+                    <ul>
+                        {% for item in order.order_items %}
+                            <li>
+                                {{item.quantity}}x {{item.name}}
+                                {% if item.note %}
+                                    <br><em>Note: {{item.note}}</em>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <p>
+                        <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
+                    </p>
+                    
+                    <form action="/b_update_order_status" method="post">
+                        <input type="hidden" name="order_id" value="{{order.id}}">
+                        <input type="hidden" name="status" value="picked_up">
+                        <button type="submit">Picked Up</button>
+                    </form>
+                </div>
+                <hr>
+            {% endfor %}
+        </div>
     {% endif %}
 
 </body>
