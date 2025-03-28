@@ -10,13 +10,13 @@ Our web app ButterRush, allows individuals to order ahead from the Yale buttery 
 - Simple User UI: Butteries, Orders In Progress, Cart, Account
 - Order items off of a fixed menu + optional descriptional notes for each menu item
 - Simple Buttery UI: My Buttery, Order Queue, Account
-- User creates account: username = email
+- User creates account
 - Butteries able to log into their Buttery account
 - User submits single-item order(s) (payment in-person when picking up food)
 - User UI shows orders(s) in progress
 - Buttery worker receives order which is put into order queue
 - Buttery worker checks off order when done, and order status on User side changes to ready (for pick-up)
-- Buttery worker acknowledges that user received their food *delete order from queue & user orders in progress & received order*
+- Buttery worker acknowledges that user received their food which deletes order from queue & user orders in progress
 - Techstack used: Flask, SQLite
 
 MVP Figma Wireframe: https://www.figma.com/design/LjKQgS0H2t7sxeloq0wsxY/Butterrush-Wireframe-MVP-v0?m=auto&t=9HOD9R9hE286vW7k-6 
