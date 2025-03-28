@@ -136,11 +136,12 @@ def u_login_submit():
         return response
 
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now()
     db.session.commit()
 
     response = make_response(redirect(url_for('u_butteries')))
     response.set_cookie('user_id', str(user.user_id))
+    response.set_cookie('u_username', username)
     return response
 
 #-----------------------------------------------------------------------
@@ -362,7 +363,7 @@ def u_ordersIP():
 
 @app.route('/u_account', methods=['GET'])  
 def u_account():
-    html = render_template('u_account.html', username=request.cookies.get('username'))
+    html = render_template('u_account.html', username=request.cookies.get('u_username'))
     response = make_response(html)
     
     return response
