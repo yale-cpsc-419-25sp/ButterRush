@@ -511,9 +511,11 @@ def b_orderQueue():
         for item in order.order_items:
             menu_item = MenuItem.query.get(item.menu_item_id)
             order_items.append({
+                'id': item.order_item_id,  # Need this for checkbox updates
                 'name': menu_item.item_name,
                 'quantity': item.quantity,
-                'note': item.note
+                'note': item.note,
+                'checked': item.checked  # Include checked status
             })
         
         user = User.query.get(order.user_id)
@@ -537,6 +539,7 @@ def b_update_order_status():
     order = Order.query.get(order_id)
     if order:
         order.status = new_status
+        # Don't reset the checked status of items when updating order status
         db.session.commit()
     
     return redirect(url_for('b_orderQueue'))
@@ -601,3 +604,26 @@ def u_update_quantity():
     response = make_response(redirect(url_for('u_cart')))
     response.set_cookie('cart', json.dumps(cart))
     return response
+
+# allows checked items to persist when order status is updated
+@app.route('/b_update_item_check', methods=['POST'])
+def b_update_item_check():
+    data = request.get_json()
+    
+    order_id = data.get('order_id')
+    item_id = data.get('item_id')
+    checked = data.get('checked')
+
+    
+    order_item = OrderItem.query.filter_by(
+        order_id=order_id,
+        order_item_id=item_id
+    ).first()
+    
+    
+    if order_item:
+        order_item.checked = checked
+        db.session.commit()
+        print(f"Updated checked status to: {checked}")  # Debug print
+    
+    return '', 200

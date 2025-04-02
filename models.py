@@ -90,4 +90,5 @@ class OrderItem(db.Model):
     menu_item_id = db.Column(db.Integer, db.ForeignKey('menu_items.menu_item_id'), nullable=False)
     quantity = db.Column(db.Integer, default=1, nullable=False)
     note = db.Column(db.String)
-    item_price = db.Column(db.Numeric(10,2), nullable=False) 
+    item_price = db.Column(db.Numeric(10,2), nullable=False)
+    checked = db.Column(db.Boolean, default=False)  # For buttery to track completion 
