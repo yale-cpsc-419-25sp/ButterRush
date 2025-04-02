@@ -584,3 +584,20 @@ def logout():
     response.set_cookie('password', '')
     
     return response
+
+
+@app.route('/u_update_quantity', methods=['POST'])
+def u_update_quantity():
+    index = int(request.form.get('index'))
+    new_quantity = int(request.form.get('quantity'))
+    
+    cart_cookie = request.cookies.get('cart')
+    cart = json.loads(cart_cookie) if cart_cookie else []
+    
+    # Update quantity if index is valid
+    if 0 <= index < len(cart):
+        cart[index]['quantity'] = new_quantity
+    
+    response = make_response(redirect(url_for('u_cart')))
+    response.set_cookie('cart', json.dumps(cart))
+    return response
