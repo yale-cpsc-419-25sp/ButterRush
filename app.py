@@ -545,10 +545,34 @@ def b_update_order_status():
 
 @app.route('/b_account', methods=['GET']) 
 def b_account():
-    html = render_template('b_account.html', username=request.cookies.get('username')) 
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
+    html = render_template('b_account.html', 
+                         username=buttery_name,
+                         buttery=buttery)  # Pass the buttery object to template
     response = make_response(html)
     
     return response
+
+@app.route('/b_update_hours', methods=['POST'])
+def b_update_hours():
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
+    new_hours = request.form.get('opening_hours')
+    if new_hours:
+        buttery.opening_hours = new_hours
+        db.session.commit()
+    
+    return redirect(url_for('b_account'))
+
 #-----------------------------------------------------------------------
 
 @app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
