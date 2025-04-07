@@ -2,12 +2,15 @@
 
 from flask import Flask, request, make_response, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem
 from datetime import datetime
 import json
 import os
+from dotenv import load_dotenv
 
-# ! should there be 2 separate apps for user and buttery
+# loads email creds from .env file # ! can also put user and buttery credentials in .env and make init_db.py load from that! 
+load_dotenv()
 
 app = Flask(__name__, template_folder='./html')
 
@@ -29,8 +32,30 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'bu
 # Disabling it improves performance
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Sets up email sending stuff
+app.config['MAIL_SERVER']         = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT']           = os.getenv('MAIL_PORT')
+app.config['MAIL_USE_TLS']        = False # ! could it be replaced with 0 or 1 in the env file?
+app.config['MAIL_USE_SSL']        = True
+app.config['MAIL_USERNAME']       = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD']       = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+mail = Mail(app)
 db.init_app(app)
 
+'''
+flask-mail.MAIL_SERVER: str = localhost
+flask-mail.MAIL_PORT: int = 25
+flask-mail.MAIL_USE_TLS: bool = False
+flask-mail.MAIL_USE_SSL: bool = False
+flask-mail.MAIL_DEBUG: bool = app.debug
+flask-mail.MAIL_USERNAME: str | None = None
+flask-mail.MAIL_PASSWORD: str | None = None
+flask-mail.MAIL_DEFAULT_SENDER: str | None = None
+flask-mail.MAIL_MAX_EMAILS: int | None = None
+flask-mail.MAIL_SUPPRESS_SEND: bool = app.testing
+flask-mail.MAIL_ASCII_ATTACHMENTS: bool = False'''
 
 #-----------------------------------------------------------------------
 
@@ -497,7 +522,7 @@ def b_orderQueue():
     if not buttery:
         return redirect(url_for('b_login'))
     
-    # Get orders that are pending or ready (not picked up)
+    # Get orders that are pending or ready (not picked up) # ! does this mean we keep all orders in history ever lmao
     orders = Order.query.filter_by(
         buttery_id=buttery.buttery_id
     ).filter(
@@ -535,9 +560,24 @@ def b_orderQueue():
 def b_update_order_status():
     order_id = request.form.get('order_id')
     new_status = request.form.get('status')
-    
+
     order = Order.query.get(order_id)
+
     if order:
+        
+        # send email to user
+        if new_status == "ready":
+            user = User.query.get(order.user_id)
+
+            buttery = Buttery.query.get(order.buttery_id)
+
+            if user and buttery:
+                mail_message = Message(
+                        'Your buttery order is ready!', 
+                        recipients = [user.email]) # get user_id email
+                mail_message.body = f"Your order from {buttery.buttery_name} is ready!"
+                mail.send(mail_message)
+
         order.status = new_status
         # Don't reset the checked status of items when updating order status
         db.session.commit()
@@ -619,7 +659,6 @@ def b_update_item_check():
         order_id=order_id,
         order_item_id=item_id
     ).first()
-    
     
     if order_item:
         order_item.checked = checked
