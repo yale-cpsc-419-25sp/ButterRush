@@ -136,11 +136,12 @@ def u_login_submit():
         return response
 
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now()
     db.session.commit()
 
     response = make_response(redirect(url_for('u_butteries')))
     response.set_cookie('user_id', str(user.user_id))
+    response.set_cookie('u_username', username)
     return response
 
 #-----------------------------------------------------------------------
@@ -362,7 +363,7 @@ def u_ordersIP():
 
 @app.route('/u_account', methods=['GET'])  
 def u_account():
-    html = render_template('u_account.html', username=request.cookies.get('username'))
+    html = render_template('u_account.html', username=request.cookies.get('u_username'))
     response = make_response(html)
     
     return response
@@ -510,9 +511,11 @@ def b_orderQueue():
         for item in order.order_items:
             menu_item = MenuItem.query.get(item.menu_item_id)
             order_items.append({
+                'id': item.order_item_id,  # Need this for checkbox updates
                 'name': menu_item.item_name,
                 'quantity': item.quantity,
-                'note': item.note
+                'note': item.note,
+                'checked': item.checked  # Include checked status
             })
         
         user = User.query.get(order.user_id)
@@ -536,6 +539,7 @@ def b_update_order_status():
     order = Order.query.get(order_id)
     if order:
         order.status = new_status
+        # Don't reset the checked status of items when updating order status
         db.session.commit()
     
     return redirect(url_for('b_orderQueue'))
@@ -544,10 +548,34 @@ def b_update_order_status():
 
 @app.route('/b_account', methods=['GET']) 
 def b_account():
-    html = render_template('b_account.html', username=request.cookies.get('username')) 
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
+    html = render_template('b_account.html', 
+                         username=buttery_name,
+                         buttery=buttery)  # Pass the buttery object to template
     response = make_response(html)
     
     return response
+
+@app.route('/b_update_hours', methods=['POST'])
+def b_update_hours():
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
+    new_hours = request.form.get('opening_hours')
+    if new_hours:
+        buttery.opening_hours = new_hours
+        db.session.commit()
+    
+    return redirect(url_for('b_account'))
+
 #-----------------------------------------------------------------------
 
 @app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
@@ -559,3 +587,43 @@ def logout():
     response.set_cookie('password', '')
     
     return response
+
+
+@app.route('/u_update_quantity', methods=['POST'])
+def u_update_quantity():
+    index = int(request.form.get('index'))
+    new_quantity = int(request.form.get('quantity'))
+    
+    cart_cookie = request.cookies.get('cart')
+    cart = json.loads(cart_cookie) if cart_cookie else []
+    
+    # Update quantity if index is valid
+    if 0 <= index < len(cart):
+        cart[index]['quantity'] = new_quantity
+    
+    response = make_response(redirect(url_for('u_cart')))
+    response.set_cookie('cart', json.dumps(cart))
+    return response
+
+# allows checked items to persist when order status is updated
+@app.route('/b_update_item_check', methods=['POST'])
+def b_update_item_check():
+    data = request.get_json()
+    
+    order_id = data.get('order_id')
+    item_id = data.get('item_id')
+    checked = data.get('checked')
+
+    
+    order_item = OrderItem.query.filter_by(
+        order_id=order_id,
+        order_item_id=item_id
+    ).first()
+    
+    
+    if order_item:
+        order_item.checked = checked
+        db.session.commit()
+        print(f"Updated checked status to: {checked}")  # Debug print
+    
+    return '', 200
