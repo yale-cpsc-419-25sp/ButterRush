@@ -2,7 +2,8 @@
 
 from flask import Flask, request, make_response, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
+import yagmail
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem
 from datetime import datetime
 import json
@@ -33,16 +34,24 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'bu
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Sets up email sending stuff
-app.config['MAIL_SERVER']         = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT']           = os.getenv('MAIL_PORT')
-app.config['MAIL_USE_TLS']        = False # ! could it be replaced with 0 or 1 in the env file?
-app.config['MAIL_USE_SSL']        = True
-app.config['MAIL_USERNAME']       = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD']       = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+# app.config['MAIL_SERVER']         = os.getenv('MAIL_SERVER')
+# app.config['MAIL_PORT']           = os.getenv('MAIL_PORT')
+# app.config['MAIL_USE_TLS']        = True # ! could it be replaced with 0 or 1 in the env file?
+# app.config['MAIL_USE_SSL']        = False
+# app.config['MAIL_USERNAME']       = os.getenv('MAIL_USERNAME')
+# app.config['MAIL_PASSWORD']       = os.getenv('MAIL_PASSWORD')
+# app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-mail = Mail(app)
+# mail = Mail(app)
 db.init_app(app)
+
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+# print("UWU", MAIL_USERNAME, MAIL_PASSWORD)
+
+yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
+yag = yagmail.SMTP(MAIL_USERNAME)
 
 '''
 flask-mail.MAIL_SERVER: str = localhost
@@ -522,7 +531,7 @@ def b_orderQueue():
     if not buttery:
         return redirect(url_for('b_login'))
     
-    # Get orders that are pending or ready (not picked up) # ! does this mean we keep all orders in history ever lmao
+    # Get orders that are pending or ready (not picked up) # ! does this mean we keep all orders in history ever in our orders table? we could delete or we could recommend based on most frequently ordered
     orders = Order.query.filter_by(
         buttery_id=buttery.buttery_id
     ).filter(
@@ -564,19 +573,15 @@ def b_update_order_status():
     order = Order.query.get(order_id)
 
     if order:
-        
+
         # send email to user
         if new_status == "ready":
-            user = User.query.get(order.user_id)
 
+            user = User.query.get(order.user_id)
             buttery = Buttery.query.get(order.buttery_id)
 
             if user and buttery:
-                mail_message = Message(
-                        'Your buttery order is ready!', 
-                        recipients = [user.email]) # get user_id email
-                mail_message.body = f"Your order from {buttery.buttery_name} is ready!"
-                mail.send(mail_message)
+                yag.send(to=user.email, subject='Your buttery order is ready!', contents=f"Your order from {buttery.buttery_name} buttery is ready!")
 
         order.status = new_status
         # Don't reset the checked status of items when updating order status
