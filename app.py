@@ -489,20 +489,28 @@ def b_display_item():
 
 #-----------------------------------------------------------------------
 
-# @app.route('/b_delete_item', methods=['POST'])
-# def b_delete_item():
-#     menu_item_name = request.args.get('menu_item')
-#     buttery_name = request.cookies.get('username')
+@app.route('/b_delete_item', methods=['POST'])
+def b_delete_item():
+    menu_item_name = request.form.get('menu_item')
+    buttery_name = request.cookies.get('username')
     
-#     # Get menu item from database
-#     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-#     menu_item = MenuItem.query.filter_by(
-#         buttery_id=buttery.buttery_id,
-#         item_name=menu_item_name
-#     ).first()
+    # Get menu item from database
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    menu_item = MenuItem.query.filter_by(
+        buttery_id=buttery.buttery_id,
+        item_name=menu_item_name
+    ).first()
     
-#     if not menu_item:
-#         return "Menu item not found", 404
+    if not menu_item:
+        return "Menu item not found", 404 # change to error message and redirect back to buttery menu
+    
+    item_ingredients = MenuItemIngredient.query.filter_by(menu_item_id=menu_item.menu_item_id).all()
+    for item in item_ingredients:
+        db.session.delete(item)
+        
+    db.session.delete(menu_item)
+    db.session.commit()
+    return redirect(url_for('b_myButtery'))
 
 #-----------------------------------------------------------------------
 

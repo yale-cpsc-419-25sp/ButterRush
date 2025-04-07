@@ -16,18 +16,20 @@
     <h2>{{buttery}}</h2>
     <br>
 
-    <button>Edit menu</button>  <!-- want to add this fxnality -->
-    <br>
-
-    {% for menuItem in menuItems %} 
-    <form action="b_display_item" method="get">
-        <input type="submit" name="menu_item" value="{{menuItem}}">
-    </form>
-    <br>
-    {% endfor %}
-    <form action="b_create_item" method="get">
-        <input type="submit" name="create_item" value="Create new menu item">
-    </form>
+    <div style="width: fit-content">
+        {% for menuItem in menuItems %} 
+            <form action="b_delete_item" method="post">
+                <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
+                <a href="{{ url_for('b_display_item', menu_item=menuItem) }}" style="padding-right:20px">{{menuItem}}</a>
+                <input type="hidden" name="menu_item" value="{{menuItem}}">
+                <input type="submit" name="delete" value="Delete" style="float: right">
+            </form>
+            <br>
+        {% endfor %}
+        <form action="b_create_item" method="get">
+            <input type="submit" name="create_item" value="Create new menu item">
+        </form>
+    </div>
 </body>
 
 </html>
