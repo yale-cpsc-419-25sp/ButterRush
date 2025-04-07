@@ -4,6 +4,8 @@ from flask import Flask, request, make_response, redirect, url_for, render_templ
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
 import yagmail
+# from threading import Thread
+import asyncio
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem
 from datetime import datetime
 import json
@@ -565,6 +567,14 @@ def b_orderQueue():
     
     return render_template('b_orderQueue.html', orders=formatted_orders)
 
+async def send_email(user_email, buttery_name):
+    asyncio.to_thread(
+        yag.send,
+        to=user_email,
+        subject='[Butterrush] Your buttery order is ready!',
+        contents=f"Your order from {buttery_name} buttery is ready!"
+    ) # do not wait for result
+
 @app.route('/b_update_order_status', methods=['POST'])
 def b_update_order_status():
     order_id = request.form.get('order_id')
@@ -581,7 +591,7 @@ def b_update_order_status():
             buttery = Buttery.query.get(order.buttery_id)
 
             if user and buttery:
-                yag.send(to=user.email, subject='Your buttery order is ready!', contents=f"Your order from {buttery.buttery_name} buttery is ready!")
+                asyncio.run(send_email(user.email, buttery.buttery_name)) 
 
         order.status = new_status
         # Don't reset the checked status of items when updating order status
