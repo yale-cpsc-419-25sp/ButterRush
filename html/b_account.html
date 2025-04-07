@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Account</title>
+    <title>Buttery Account</title>
 </head>
 
 <body>
@@ -13,7 +13,24 @@
     </div>
     <br>
 
-    <h2>{{username}}</h2>
+    <h2>Account Settings</h2>
+    
+    <div class="hours-section">
+        <h3>Opening Hours</h3>
+        <p>Current hours: {{buttery.opening_hours if buttery.opening_hours else 'Not set'}}</p>
+        
+        <form action="/b_update_hours" method="post">
+            <label for="opening_hours">Update Opening Hours:</label><br>
+            <input type="text" id="opening_hours" name="opening_hours"
+                   value="{{buttery.opening_hours}}"><br>
+            <button type="submit">Update Hours</button>
+        </form>
+    </div>
+
+    <div class="account-info">
+        <h3>Buttery Information</h3>
+        <p>Name: {{buttery.buttery_name}}</p>
+    </div>
 
     <form action="logout" method="get">
         <input type="submit" value="Log out">
