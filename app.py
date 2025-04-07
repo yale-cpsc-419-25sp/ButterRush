@@ -4,7 +4,6 @@ from flask import Flask, request, make_response, redirect, url_for, render_templ
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
 import yagmail
-# from threading import Thread
 import asyncio
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem
 from datetime import datetime
