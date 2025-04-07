@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create Menu Item</title>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/b_myButtery">My buttery</a>
+        <a href="/b_orderQueue">Order queue</a>
+        <a href="/b_account">Account</a>
+    </div>
+    <br>
+    <div style="display: flex">
+        <div style="margin: 20px; padding: 20px; border: 1px solid black; padding: 20px">
+            <h2>Create Menu Item</h2>
+            <br>
+            <form id="create_item_form" action="b_create_item" method="post">
+                <input type="hidden" name="action" value="create_item"/>
+                <label for="item_name">Menu Item Name:</label>
+                <input style="margin-bottom:10px" type="text" name="item_name"/>
+                <br>
+                <label for="description">Description:</label>
+                <input style="margin-bottom:10px" type="text" name="description"/>
+                <br>
+                <label for="category">Category:</label>
+                <select name="category" style="margin-bottom:10px">
+                    <option value="Savory">Savory</option>
+                    <option value="Sweet">Sweet</option>
+                    <option value="Other">Other</option>
+                </select>
+                <br>
+                <label for="price">Price:</label>
+                <input style="margin-bottom:10px" type="number" step="0.01" name="price"/>
+            </form>
+
+            <form action="b_create_item" method="post">
+                <input type="hidden" name="action" value="add_ingredient"/>
+                <input style="display: inline-block" list="ingredients" name="ingredient"/>
+                <datalist id="ingredients">
+                    {% for ingredient in ingredients %}
+                        <option value="{{ingredient}}"></option>
+                    {% endfor %}
+                </datalist>
+                <input style="display: inline-block" type="submit" name="add_ingredient" value="Add">
+            </form>
+
+            <form style="margin: 10px" action="b_create_item" method="post">
+                <input type="hidden" name="action" value="remove_all">
+                <input type="submit" value="Clear All Ingredients"></label>
+            </form>
+
+            {% if message %}
+                <p style="color: red;">{{ message }}</p>
+            {% endif %}
+
+            <ul>
+                {% for i in range(item_ingredients|length) %}
+                    <li style="margin-bottom: 10px">
+                        {{item_ingredients[i]}}
+                        <form style="display: inline-block" action="b_create_item" method="post">
+                            <input type="hidden" name="action" value="remove_ingredient">
+                            <input type="hidden" name="item_index" value="{{i}}">
+                            <input type="submit" value="Remove"></label>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <input form="create_item_form" type="submit" value="Create"/>
+        </div>
+
+        <div style="margin: 20px; padding: 20px; border: 1px solid black">
+            <h3>Buttery Ingredients:</h3>
+            <ul>
+                {% for ingredient in ingredients %}
+                    <li style="margin-bottom: 10px">
+                        {{ingredient}}
+                    </li>
+                {% endfor %}
+            </ul>
+            <form action="b_create_item" method="post">
+                <input type="hidden" name="action" value="new_ingredient">
+                <input type="text" name="ingredient">
+                <input type="submit" value="Add New Ingredient"></label>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

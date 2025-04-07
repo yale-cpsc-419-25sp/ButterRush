@@ -2,7 +2,7 @@
 
 from flask import Flask, request, make_response, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
-from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem
+from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient
 from datetime import datetime
 import json
 import os
@@ -487,6 +487,163 @@ def b_display_item():
     
     return response
 
+#-----------------------------------------------------------------------
+
+# @app.route('/b_delete_item', methods=['POST'])
+# def b_delete_item():
+#     menu_item_name = request.args.get('menu_item')
+#     buttery_name = request.cookies.get('username')
+    
+#     # Get menu item from database
+#     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+#     menu_item = MenuItem.query.filter_by(
+#         buttery_id=buttery.buttery_id,
+#         item_name=menu_item_name
+#     ).first()
+    
+#     if not menu_item:
+#         return "Menu item not found", 404
+
+#-----------------------------------------------------------------------
+
+@app.route('/b_create_item', methods=['GET', 'POST'])
+def b_create_item():
+    item_ingredients = request.cookies.get('item_ingredients')
+    pending = ""
+    if item_ingredients:
+        item_ingredients = item_ingredients.split(",")
+    else:
+        item_ingredients = []
+        
+    ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
+    
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
+    if request.method == 'GET':
+        return render_template('b_create_item.html', 
+                             buttery=buttery_name,
+                             ingredients=ingredients,
+                             item_ingredients=item_ingredients)
+        
+    elif request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == "create_item":
+            item_name = request.form.get('item_name')
+            price = request.form.get('price')
+            description = request.form.get('description')
+            category = request.form.get('category')
+            ingredient_ids = []
+            
+            message = ""
+            if not item_name or not price:
+                message = "Item name and price are required."
+            elif int(price) < 0:
+                message="Price cannot be negative."
+            elif item_name in [item.item_name for item in MenuItem.query.filter_by(buttery_id=buttery.buttery_id).all()]:
+                message = f"{item_name} already exists."
+            else:
+                for name in item_ingredients:
+                    ingredient = Ingredient.query.filter_by(ingredient_name=name).first()
+                    if not ingredient:
+                        message += f"{name} not found.\n"
+                    else:
+                        ingredient_ids.append(ingredient.ingredient_id)
+            
+            if message: # Some ingredients were not found in the ingredients database
+                return render_template('b_create_item.html', 
+                                buttery=buttery_name,
+                                ingredients=ingredients,
+                                item_ingredients=item_ingredients,
+                                message=message) # Change this, allow adding ingredients
+                
+            # Create new menu item
+            new_item = MenuItem(
+                buttery_id=buttery.buttery_id,
+                item_name=item_name,
+                description=description,
+                price=price,
+                category=category,
+                is_available=True
+            )
+            db.session.add(new_item)
+            item_id = MenuItem.query.filter_by(buttery_id=buttery.buttery_id, item_name=item_name).first().menu_item_id
+            
+            for ingredient_id in ingredient_ids:
+                db.session.add(MenuItemIngredient(menu_item_id=item_id,
+                                ingredient_id=ingredient_id,
+                                quantity=1)) # Quantity default 1
+            
+            db.session.commit()
+            return redirect(url_for('b_myButtery'))
+            
+        elif action == "add_ingredient":
+            new_ingredient = request.form.get('ingredient')
+            message = ""
+            if new_ingredient:
+                if new_ingredient not in ingredients:
+                    message = f"{new_ingredient} not found in ingredients database."
+                elif new_ingredient in item_ingredients:
+                    message = f"{new_ingredient} was already added.\n"
+                else:
+                    item_ingredients.append(new_ingredient)
+                    
+            response = make_response(render_template('b_create_item.html',
+                             buttery=buttery_name,
+                             ingredients=ingredients,
+                             item_ingredients=item_ingredients,
+                             message=message))
+            response.set_cookie('item_ingredients', ",".join(item_ingredients))
+            return response
+            
+        elif action == "remove_all":
+            item_ingredients = []
+            response = make_response(render_template('b_create_item.html',
+                             buttery=buttery_name,
+                             ingredients=ingredients,
+                             item_ingredients=item_ingredients))
+            response.set_cookie('item_ingredients', "")
+            return response
+        
+        elif action == "remove_ingredient":
+            item_index = int(request.form.get('item_index'))
+            if 0 <= item_index < len(item_ingredients):
+                item_ingredients.pop(item_index)
+            response = make_response(render_template('b_create_item.html',
+                             buttery=buttery_name,
+                             ingredients=ingredients,
+                             item_ingredients=item_ingredients))
+            response.set_cookie('item_ingredients', ",".join(item_ingredients))
+            return response
+        
+        elif action == "new_ingredient":
+            name = request.form.get('ingredient').strip()
+            if not name or name in ingredients:
+                print(ingredients)
+                print([i.ingredient_name for i in Ingredient.query.all()])
+                message = f"{name} already exists." if name in ingredients else ""
+                return make_response(render_template('b_create_item.html',
+                            buttery=buttery_name,
+                            ingredients=ingredients,
+                            item_ingredients=item_ingredients,
+                            message=message))
+                
+            # Add new ingredient to database
+            quantity = 100 # where should quantity be set?
+            new_ingredient = Ingredient(ingredient_name=name, inventory_quantity=quantity)
+            db.session.add(new_ingredient)
+            db.session.commit()
+            ingredients.append(name)
+            print([i.ingredient_name for i in Ingredient.query.all()])
+            
+            return make_response(render_template('b_create_item.html',
+                            buttery=buttery_name,
+                            ingredients=ingredients,
+                            item_ingredients=item_ingredients))
+    
 #-----------------------------------------------------------------------
 
 @app.route('/b_orderQueue', methods=['GET']) 
