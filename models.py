@@ -83,8 +83,12 @@ class Order(db.Model):
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
     
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.order_id'), primary_key=True)
-    menu_item_id = db.Column(db.Integer, db.ForeignKey('menu_items.menu_item_id'), primary_key=True)
-    quantity = db.Column(db.Integer, default=1, nullable=False)  # How many of this item
-    note = db.Column(db.String)  # Special instructions
-    item_price = db.Column(db.Numeric(10,2), nullable=False)  # Price at time of order 
+    # Add a unique primary key (fixes multiple items in one order error)
+    order_item_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # Make these foreign keys but not primary keys (fixes multiple items in one order error)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.order_id'), nullable=False)
+    menu_item_id = db.Column(db.Integer, db.ForeignKey('menu_items.menu_item_id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1, nullable=False)
+    note = db.Column(db.String)
+    item_price = db.Column(db.Numeric(10,2), nullable=False)
+    checked = db.Column(db.Boolean, default=False)  # For buttery to track completion 
