@@ -33,39 +33,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'bu
 # Disables the SQLAlchemy modification tracking system
 # Disabling it improves performance
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Sets up email sending stuff
-# app.config['MAIL_SERVER']         = os.getenv('MAIL_SERVER')
-# app.config['MAIL_PORT']           = os.getenv('MAIL_PORT')
-# app.config['MAIL_USE_TLS']        = True # ! could it be replaced with 0 or 1 in the env file?
-# app.config['MAIL_USE_SSL']        = False
-# app.config['MAIL_USERNAME']       = os.getenv('MAIL_USERNAME')
-# app.config['MAIL_PASSWORD']       = os.getenv('MAIL_PASSWORD')
-# app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-
-# mail = Mail(app)
 db.init_app(app)
 
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
-# print("UWU", MAIL_USERNAME, MAIL_PASSWORD)
-
 yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
 yag = yagmail.SMTP(MAIL_USERNAME)
-
-'''
-flask-mail.MAIL_SERVER: str = localhost
-flask-mail.MAIL_PORT: int = 25
-flask-mail.MAIL_USE_TLS: bool = False
-flask-mail.MAIL_USE_SSL: bool = False
-flask-mail.MAIL_DEBUG: bool = app.debug
-flask-mail.MAIL_USERNAME: str | None = None
-flask-mail.MAIL_PASSWORD: str | None = None
-flask-mail.MAIL_DEFAULT_SENDER: str | None = None
-flask-mail.MAIL_MAX_EMAILS: int | None = None
-flask-mail.MAIL_SUPPRESS_SEND: bool = app.testing
-flask-mail.MAIL_ASCII_ATTACHMENTS: bool = False'''
 
 #-----------------------------------------------------------------------
 
