@@ -457,35 +457,147 @@ def b_myButtery():
     
     html = render_template('b_myButtery.html', 
                          buttery=buttery_name,
-                         menuItems=[item.item_name for item in menu_items])
+                         menuItems=[item.item_name for item in menu_items],
+                         itemIDs=[item.menu_item_id for item in menu_items])
     response = make_response(html)
 
     return response
 
 #-----------------------------------------------------------------------
 
-@app.route('/b_display_item', methods=['GET'])
-def b_display_item():
-    menu_item_name = request.args.get('menu_item')
+@app.route('/b_display_item/<string:item_id>', methods=['GET', 'POST'])
+def b_display_item(item_id):
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        return redirect(url_for('b_myButtery'))
+    
     buttery_name = request.cookies.get('username')
     
-    # Get menu item from database
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     menu_item = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
-        item_name=menu_item_name
-    ).first()
+        menu_item_id=item_id).first()
     
     if not menu_item:
-        return "Menu item not found", 404
+        print("Menu item not found in DB!")
+        return redirect(url_for('b_myButtery'))
     
-    html = render_template('b_menuItem.html',
-                         ingredients=[ing.ingredient_name for ing in menu_item.ingredients],
-                         buttery=buttery_name,
-                         menuItem=menu_item.item_name)
-    response = make_response(html)
+    if request.method == "GET":
+        html = render_template('b_menuItem.html',
+                            ingredients=[ing.ingredient_name for ing in menu_item.ingredients],
+                            buttery=buttery_name,
+                            menuItem=menu_item.item_name,
+                            price=menu_item.price,
+                            description=menu_item.description,
+                            category=menu_item.category,
+                            edit_mode=True,
+                            menuItemID=menu_item.menu_item_id)
+        response = make_response(html)
+        return response
+
+    elif request.method == "POST":
+        item_name = request.form.get('item_name')
+        price = request.form.get('price')
+        description = request.form.get('description')
+        category = request.form.get('category')
+        
+        if not menu_item:
+            print("Menu item not found in DB!")
+            return redirect(url_for('b_myButtery'))
+        
+        menu_item.item_name = item_name
+        menu_item.description = description
+        menu_item.price = price
+        menu_item.category = category
+        db.session.commit()
+        return redirect(url_for('b_display_item', item_id=item_id))
+
+#-----------------------------------------------------------------------
+
+@app.route('/b_edit_item_ingredients/<string:item_id>', methods=['GET', 'POST'])
+def b_edit_item_ingredients(item_id):
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        print("ID can't be converted to int")
+        return redirect(url_for('b_myButtery'))
     
-    return response
+    item = MenuItem.query.filter_by(menu_item_id=item_id).first()
+    if not item:
+        print("Menu item not found in DB!")
+        return redirect(url_for('b_myButtery'))
+    
+    item_ingredients = [ing.ingredient_name for ing in item.ingredients]
+    
+    ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
+    
+    buttery_name = request.cookies.get('username')
+    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    
+    if request.method == 'GET':
+        return render_template('b_edit_item_ingredients.html',
+                               item_id=item_id,
+                               item_name=item.item_name,
+                               item_ingredients=item_ingredients,
+                               ingredients=ingredients)
+    elif request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == "add_ingredient":
+            ingredient_name = request.form.get('ingredient')
+            ingredient = Ingredient.query.filter_by(ingredient_name=ingredient_name).first()
+            
+            message = ""
+            if not ingredient:
+                message = f"{ingredient_name} not found in buttery ingredients list. New ingredients can be added on the right.\n"
+            elif ingredient_name in item_ingredients:
+                message = f"Ingredients can only be added once."
+                
+            if message:
+                return render_template('b_edit_item_ingredients.html', 
+                                item_id=item_id,
+                                item_name=item.item_name,
+                                ingredients=ingredients,
+                                item_ingredients=item_ingredients,
+                                message=message)
+
+            db.session.add(MenuItemIngredient(menu_item_id=item_id,
+                            ingredient_id=ingredient.ingredient_id,
+                            quantity=1)) # Quantity default 1
+            db.session.commit()
+            return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
+        
+        elif action == "remove_ingredient":
+            ingredient_name = request.form.get('ingredient')
+            ingredient = Ingredient.query.filter_by(ingredient_name=ingredient_name).first()
+            if not ingredient:
+                return "Removed ingredient not found", 404
+            
+            item_ingredient = MenuItemIngredient.query.filter_by(menu_item_id=item_id, ingredient_id=ingredient.ingredient_id).first()
+            db.session.delete(item_ingredient)
+            
+            db.session.commit()
+            return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
+        
+        elif action == "new_ingredient":
+            name = request.form.get('ingredient').strip()
+            if not name or name in ingredients:
+                message = f"{name} already exists." if name in ingredients else ""
+                return make_response(render_template('b_edit_item_ingredients.html',
+                            item_id=item_id,
+                            item_name=item.item_name,
+                            item_ingredients=item_ingredients,
+                            ingredients=ingredients,
+                            message=message))
+                
+            # Add new ingredient to database
+            quantity = 100 # where should quantity be set?
+            new_ingredient = Ingredient(ingredient_name=name, inventory_quantity=quantity)
+            db.session.add(new_ingredient)
+            db.session.commit()
+            
+            return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
 
 #-----------------------------------------------------------------------
 
@@ -498,8 +610,7 @@ def b_delete_item():
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     menu_item = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
-        item_name=menu_item_name
-    ).first()
+        item_name=menu_item_name).first()
     
     if not menu_item:
         return "Menu item not found", 404 # change to error message and redirect back to buttery menu
@@ -578,8 +689,9 @@ def b_create_item():
                 is_available=True
             )
             db.session.add(new_item)
-            item_id = MenuItem.query.filter_by(buttery_id=buttery.buttery_id, item_name=item_name).first().menu_item_id
-            
+            db.session.flush()
+            item_id = new_item.menu_item_id #MenuItem.query.filter_by(buttery_id=buttery.buttery_id, item_name=item_name).first().menu_item_id
+
             for ingredient_id in ingredient_ids:
                 db.session.add(MenuItemIngredient(menu_item_id=item_id,
                                 ingredient_id=ingredient_id,

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="header">
+        <a href="/b_myButtery">My buttery</a>
+        <a href="/b_orderQueue">Order queue</a>
+        <a href="/b_account">Account</a>
+    </div>
+    <br>
+    
+    <h2>{{item_name}}</h2>
+    <div style="display: flex">
+        <div style="margin: 20px; padding: 20px; border: 1px solid black; padding: 20px">
+            <h3>Edit Ingredient List</h3>
+            {% if message %}
+                <p style="color: red;">{{ message }}</p>
+            {% endif %}
+
+            <ul>
+                {% for ingredient in item_ingredients %}
+                    <li style="margin-bottom: 10px">
+                        {{ingredient}}
+                        <form style="display: inline-block" method="post">
+                            <input type="hidden" name="action" value="remove_ingredient">
+                            <input type="hidden" name="ingredient" value="{{ingredient}}">
+                            <input type="submit" value="Remove"></label>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <form method="post">
+                <input type="hidden" name="action" value="add_ingredient"/>
+                <input style="display: inline-block" list="ingredients" name="ingredient"/>
+                <datalist id="ingredients">
+                    {% for ingredient in ingredients %}
+                        <option value="{{ingredient}}"></option>
+                    {% endfor %}
+                </datalist>
+                <input style="display: inline-block" type="submit" name="add_ingredient" value="Add">
+            </form>
+            <br>
+        </div>
+
+        <div style="margin: 20px; padding: 20px; border: 1px solid black">
+            <h3>Buttery Ingredients:</h3>
+            <ul>
+                {% for ingredient in ingredients %}
+                    <li style="margin-bottom: 10px">
+                        {{ingredient}}
+                    </li>
+                {% endfor %}
+            </ul>
+            <form method="post">
+                <input type="hidden" name="action" value="new_ingredient"/>
+                <input type="text" name="ingredient"/>
+                <input type="submit" value="Add New Ingredient"></label>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
