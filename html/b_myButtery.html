@@ -18,12 +18,13 @@
 
     <div style="width: fit-content">
         {% for i in range(menuItems|length) %} 
-            <form action="b_delete_item" method="post">
+            <!-- <form action="b_delete_item" method="post"> -->
                 <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
                 <a href="{{ url_for('b_display_item', item_id=itemIDs[i]) }}" style="padding-right:20px">{{menuItems[i]}}</a>
-                <input type="hidden" name="menu_item" value="{{menuItems[i]}}">
+                <br>
+                <!-- <input type="hidden" name="menu_item" value="{{menuItems[i]}}">
                 <input type="submit" name="delete" value="Delete" style="float: right">
-            </form>
+            </form> -->
             <br>
         {% endfor %}
         <form action="b_create_item" method="get">
