@@ -2,12 +2,17 @@
 
 from flask import Flask, request, make_response, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+# from flask_mail import Mail, Message
+import yagmail
+import asyncio
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient
 from datetime import datetime
 import json
 import os
+from dotenv import load_dotenv
 
-# ! should there be 2 separate apps for user and buttery
+# loads email creds from .env file # ! can also put user and buttery credentials in .env and make init_db.py load from that! 
+load_dotenv()
 
 app = Flask(__name__, template_folder='./html')
 
@@ -28,9 +33,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'bu
 # Disables the SQLAlchemy modification tracking system
 # Disabling it improves performance
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db.init_app(app)
 
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
+yag = yagmail.SMTP(MAIL_USERNAME)
 
 #-----------------------------------------------------------------------
 
@@ -774,7 +783,7 @@ def b_orderQueue():
     if not buttery:
         return redirect(url_for('b_login'))
     
-    # Get orders that are pending or ready (not picked up)
+    # Get orders that are pending or ready (not picked up) # ! does this mean we keep all orders in history ever in our orders table? we could delete or we could recommend based on most frequently ordered
     orders = Order.query.filter_by(
         buttery_id=buttery.buttery_id
     ).filter(
@@ -808,13 +817,32 @@ def b_orderQueue():
     
     return render_template('b_orderQueue.html', orders=formatted_orders)
 
+async def send_email(user_email, buttery_name):
+    asyncio.to_thread(
+        yag.send,
+        to=user_email,
+        subject='[Butterrush] Your buttery order is ready!',
+        contents=f"Your order from {buttery_name} buttery is ready!"
+    ) # do not wait for result
+
 @app.route('/b_update_order_status', methods=['POST'])
 def b_update_order_status():
     order_id = request.form.get('order_id')
     new_status = request.form.get('status')
-    
+
     order = Order.query.get(order_id)
+
     if order:
+
+        # send email to user
+        if new_status == "ready":
+
+            user = User.query.get(order.user_id)
+            buttery = Buttery.query.get(order.buttery_id)
+
+            if user and buttery:
+                asyncio.run(send_email(user.email, buttery.buttery_name)) 
+
         order.status = new_status
         # Don't reset the checked status of items when updating order status
         db.session.commit()
@@ -896,7 +924,6 @@ def b_update_item_check():
         order_id=order_id,
         order_item_id=item_id
     ).first()
-    
     
     if order_item:
         order_item.checked = checked
