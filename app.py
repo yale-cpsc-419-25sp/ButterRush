@@ -3,7 +3,8 @@
 from flask import Flask, request, make_response, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
-import yagmail
+# import yagmail
+import smtplib
 import asyncio
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient
 from datetime import datetime
@@ -38,8 +39,8 @@ db.init_app(app)
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
-yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
-yag = yagmail.SMTP(MAIL_USERNAME)
+# yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
+# yag = yagmail.SMTP(MAIL_USERNAME)
 
 #-----------------------------------------------------------------------
 
@@ -738,13 +739,30 @@ def b_orderQueue():
     
     return render_template('b_orderQueue.html', orders=formatted_orders)
 
-async def send_email(user_email, buttery_name):
-    asyncio.to_thread(
-        yag.send,
-        to=user_email,
-        subject='[Butterrush] Your buttery order is ready!',
-        contents=f"Your order from {buttery_name} buttery is ready!"
-    ) # do not wait for result
+# async def send_email(user_email, buttery_name):
+#     asyncio.to_thread(
+#         yag.send,
+#         to=user_email,
+#         subject='[Butterrush] Your buttery order is ready!',
+#         contents=f"Your order from {buttery_name} buttery is ready!"
+#     ) # do not wait for result
+
+# Citation: This code is adapted from Python smtplib documentation.
+# Link: https://docs.python.org/3/library/smtplib.html#smtplib.SMTP.sendmail
+# Additionally, further credit is given to "How to send text messages with Python for Free" by David Mentgen/
+# Link: https://medium.com/testingonprod/how-to-send-text-messages-with-python-for-free-a7c92816e1a4
+async def send_email(email, message):
+    def send():
+        recipient = email
+    
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(MAIL_USERNAME, MAIL_PASSWORD)
+    
+        server.sendmail(MAIL_USERNAME, recipient, message)
+    
+    asyncio.to_thread(send())
+
 
 @app.route('/b_update_order_status', methods=['POST'])
 def b_update_order_status():
