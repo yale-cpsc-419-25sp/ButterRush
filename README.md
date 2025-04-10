@@ -28,9 +28,7 @@ MVP Figma Wireframe: https://www.figma.com/design/LjKQgS0H2t7sxeloq0wsxY/Butterr
 - Buttery workers can mark an order as “in progress” or “done”*, shows on user page and notifies them through email
 - EXTRA FEATURE: allow buttery to edit opening times – maybe this should be limited to within regular hours?
 
-Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/ButterRush-Mockup?node-id=706-2&t=QNjWS0G9IW2NYc2R-1 
-
-*KNOWN ERROR: Somewhere along our branch merging, the funtionality of the Buttery Order queue broke. Currently, when the buttery marks an item as Ready, the order disapears from the queue rather than remain on the queue with a "Mark as Picked Up" option. We will fix this in the next version!
+Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/ButterRush-Mockup?node-id=706-2&t=QNjWS0G9IW2NYc2R-1  
 
 ## Implementation Instructions: 
 
@@ -44,7 +42,8 @@ Example User Login:
 username: “ayak” 
 password: “12345678”
 
+Changing opening hours is a feature available in the Account tab on the buttery side
+
 Issues to Address/Implement in the Future: 
 
-- Notification (through email or messages) for buttery order pick-up
-- Multiple orders (multiple separate orders of the same item?)
+- Somewhere along our branch merging, the funtionality of the Buttery Order queue broke. Currently, when the buttery marks an item as Ready, the order disapears from the queue rather than remain on the queue with a "Mark as Picked Up" option. We will fix this in the next version!
