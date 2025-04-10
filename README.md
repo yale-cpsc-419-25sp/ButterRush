@@ -5,7 +5,7 @@ Sophia Zhou, Aya Kasim, Sivan Almogy, Sebastian Orozco, Emma Slagle
 
 Our web app ButterRush, allows individuals to order ahead from the Yale buttery locations and receive a notification when their order is ready for pick-up. Our application is composed of both a user side and a buttery side. Users are able to create an account, can browse buttery menus, add menu items to cart, place orders, see the status of their order (if ready for pick-up), and log out. On the buttery side, buttery workers can log-into their buttery account, can edit their buttery menu, see their order queue from customers, mark orders as ready for pick-up, and log out. When a user’s order is ready for pick-up, users make their way to the respective buttery to pay there. 
 
-## What we’ve implemented: 
+## What we’ve implemented (MVP): 
 
 - Simple User UI: Butteries, Orders In Progress, Cart, Account
 - Order items off of a fixed menu + optional descriptional notes for each menu item
@@ -20,6 +20,17 @@ Our web app ButterRush, allows individuals to order ahead from the Yale buttery 
 - Techstack used: Flask, SQLite
 
 MVP Figma Wireframe: https://www.figma.com/design/LjKQgS0H2t7sxeloq0wsxY/Butterrush-Wireframe-MVP-v0?m=auto&t=9HOD9R9hE286vW7k-6 
+
+## What we’ve implemented (Alpha): 
+- Buttery menus can be edited by buttery workers
+- User can submit multi-item order(s)
+- Users can add items to / delete from a cart before ordering
+- Buttery workers can mark an order as “in progress” or “done”*, shows on user page and notifies them through email
+- EXTRA FEATURE: allow buttery to edit opening times – maybe this should be limited to within regular hours?
+
+Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/ButterRush-Mockup?node-id=706-2&t=QNjWS0G9IW2NYc2R-1 
+
+*KNOWN ERROR: Somewhere along our branch merging, the funtionality of the Buttery Order queue broke. Currently, when the buttery marks an item as Ready, the order disapears from the queue rather than remain on the queue with a "Mark as Picked Up" option. We will fix this in the next version!
 
 ## Implementation Instructions: 
 
