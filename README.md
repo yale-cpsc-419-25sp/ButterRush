@@ -32,7 +32,12 @@ Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/Butte
 
 ## Implementation Instructions: 
 
-To run ButterRush, do `pip install -r requirements.txt`. Then, `flask run`.
+*NOTE: This is optional, but in order to send emails you must set `MAIL_USERNAME` and `MAIL_PASSWORD` in your terminal. This requires setting up an app password to login to your email account. To do this, please follow the instructions from your email service provider (likely found within the "Security" section of your email account settings). After accomplishing this, please run `export MAIL_USERNAME="[your_email]"` and `export MAIL_PASSWORD="[your_email_app_password]` to set the necessary environment variables. In the future, we will use a standard ButterRush address from which to send emails, so this is a temporary solution.*
+
+To run ButterRush, do `pip install -r requirements.txt`. 
+Then, delete the current database if it is present (which would be named `butterrush/db`) and run `python3 init_db.py` to initalize the database.
+Then, `flask run`.
+
 
 Example Buttery Login: 
 username: “Davenport” 
@@ -41,6 +46,7 @@ password: “temp_password”
 Example User Login: 
 username: “ayak” 
 password: “12345678”
+*NOTE: You may have to first create an account in order to login as a student.*
 
 Changing opening hours is a feature available in the Account tab on the buttery side
 
