@@ -77,6 +77,10 @@ def u_createAccount():
         if User.query.filter_by(email=email).first():
             return render_template('u_createAccount.html', 
                                 message="An account with this email already exists")
+            
+        if User.query.filter_by(username=username).first():
+            return render_template('u_createAccount.html', 
+                                message="An account with this username already exists")
 
         new_user = User(
             username=username,
