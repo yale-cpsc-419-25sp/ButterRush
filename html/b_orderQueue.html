@@ -5,6 +5,41 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Order Queue</title>
+    <style>
+        .pending-orders {
+            margin-bottom: 30px;
+        }
+        .ready-orders {
+            margin-top: 30px;
+        }
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .pending-orders .order-item {
+            border-left: 5px solid #ff9800;
+        }
+        .ready-orders .order-item {
+            border-left: 5px solid #4CAF50;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ff9800;
+            color: white;
+        }
+        .status-ready {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,45 +51,94 @@
     <br>
 
     <h2>Orders in Queue</h2>
-    {% if orders[0] %}
-        <div class="orders-list">
-            {% for order in orders[0] %}
-                <div class="order-item">
-                    <div class="order-header">
-                        <h3>{{order.username}}</h3>
-                        <p>Status: {{order.status}}</p>
+    
+    <!-- Pending Orders Section -->
+    <div class="pending-orders">
+        <h3>Pending Orders</h3>
+        {% if orders[0] %}
+            <div class="orders-list">
+                {% for order in orders[0] %}
+                    <div class="order-item">
+                        <div class="order-header">
+                            <h3>{{order.username}}</h3>
+                            <p><span class="status-badge status-pending">Pending</span></p>
+                        </div>
+                        
+                        <ul>
+                            {% for item in order.order_items %}
+                                <li>
+                                    <input type="checkbox" 
+                                           onchange="updateItemCheck({{order.id}}, {{item.id}}, this.checked)"
+                                           {% if item.checked %}checked{% endif %}>
+                                    {{item.quantity}}x {{item.name}}
+                                    {% if item.note %}
+                                        <br>Note: {{item.note}}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <p>
+                            <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
+                        </p>
+                        
+                        <form action="/b_update_order_status" method="post" class="status-form">
+                            <input type="hidden" name="order_id" value="{{order.id}}">
+                            <input type="hidden" name="status" value="ready">
+                            <button type="submit">Mark as Ready</button>
+                        </form>
                     </div>
-                    
-                    <ul>
-                        {% for item in order.order_items %}
-                            <li>
-                                <input type="checkbox" 
-                                       onchange="updateItemCheck({{order.id}}, {{item.id}}, this.checked)"
-                                       {% if item.checked %}checked{% endif %}>
-                                {{item.quantity}}x {{item.name}}
-                                {% if item.note %}
-                                    <br>Note: {{item.note}}
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    
-                    <p>
-                        <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
-                    </p>
-                    
-                    <form action="/b_update_order_status" method="post" class="status-form">
-                        <input type="hidden" name="order_id" value="{{order.id}}">
-                        <input type="hidden" name="status" value="ready">
-                        <button type="submit">Mark as Ready</button>
-                    </form>
-                </div>
-                <hr>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No orders in queue.</p>
-    {% endif %}
+                    <hr>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No pending orders.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Ready Orders Section -->
+    <div class="ready-orders">
+        <h3>Ready Orders</h3>
+        {% if orders[1] %}
+            <div class="orders-list">
+                {% for order in orders[1] %}
+                    <div class="order-item">
+                        <div class="order-header">
+                            <h3>{{order.username}}</h3>
+                            <p><span class="status-badge status-ready">Ready</span></p>
+                        </div>
+                        
+                        <ul>
+                            {% for item in order.order_items %}
+                                <li>
+                                    <input type="checkbox" 
+                                           onchange="updateItemCheck({{order.id}}, {{item.id}}, this.checked)"
+                                           {% if item.checked %}checked{% endif %}>
+                                    {{item.quantity}}x {{item.name}}
+                                    {% if item.note %}
+                                        <br>Note: {{item.note}}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <p>
+                            <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
+                        </p>
+                        
+                        <form action="/b_update_order_status" method="post" class="status-form">
+                            <input type="hidden" name="order_id" value="{{order.id}}">
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit">Mark as Completed</button>
+                        </form>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No ready orders.</p>
+        {% endif %}
+    </div>
 
     <script>
     function updateItemCheck(orderId, itemId, checked) {
