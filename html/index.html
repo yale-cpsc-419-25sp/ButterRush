@@ -6,22 +6,26 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body>
-    <h1>ButterRush</h1>
+<body class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card text-center p-4">
+        <h1>ButterRush</h1>
+    </div>
+    <p>Are you a student or buttery?</p>
     <br>
+    <!-- On large screens, next to eachother, smaller, stacked -->
+    <div class="row">
+        <div class="col-12 col-lg-6">
+            <form action="u_login" method="get">
+                <input type="submit" value="Student">
+            </form>
+        </div>
+        <div class="col-12 col-lg-6">
+            <form action="b_login" method="get">
+                <input type="submit" value="Buttery">
+            </form>
+        </div>
+    </div>
 
-    Are you a student or buttery?
-    <br>
-
-    <form action="u_login" method="get">
-        <input type="submit" value="Student">
-    </form>
-    <br>
-
-    <form action="b_login" method="get">
-        <input type="submit" value="Buttery">
-    </form>
-    <br>
 
 </body>
 
