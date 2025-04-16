@@ -713,7 +713,7 @@ def b_orderQueue():
     orders = Order.query.filter_by(
         buttery_id=buttery.buttery_id
     ).filter(
-        Order.status.in_(['pending', 'ready'])
+        Order.status.in_(['pending', 'ready', 'completed'])
     ).all()
     
     # Format orders for template
@@ -733,13 +733,15 @@ def b_orderQueue():
         user = User.query.get(order.user_id)
         username = user.username if user else 'Unknown User'
         
-        status_index = 0 if order.status == 'pending' else 1
-        formatted_orders[status_index].append({
-            'id': order.order_id,
-            'username': username,
-            'order_items': order_items,
-            'total_price': float(order.total_price)
-        })
+        # Only include pending and ready orders in the queue
+        if order.status in ['pending', 'ready']:
+            status_index = 0 if order.status == 'pending' else 1
+            formatted_orders[status_index].append({
+                'id': order.order_id,
+                'username': username,
+                'order_items': order_items,
+                'total_price': float(order.total_price)
+            })
     
     return render_template('b_orderQueue.html', orders=formatted_orders)
 
@@ -776,10 +778,8 @@ def b_update_order_status():
     order = Order.query.get(order_id)
 
     if order:
-
         # send email to user
         if new_status == "ready":
-
             user = User.query.get(order.user_id)
             buttery = Buttery.query.get(order.buttery_id)
 
