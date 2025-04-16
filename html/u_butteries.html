@@ -8,6 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
+    <style>
+        .buttery-btn {
+            background-color: #0d2d63;
+            border-color: #0d2d63;
+            color: white;
+        }
+        
+        .buttery-btn:hover {
+            background-color: #0a234a;
+            border-color: #0a234a;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,7 +37,7 @@
     <div class="container-fluid">
         {% for buttery in butteries %}
             <form action="u_get_buttery_menu" method="get">
-                <button class="btn btn-primary m-1" type="submit" name="buttery" value="{{buttery}}">{{buttery}}</button>
+                <button class="btn buttery-btn m-1" type="submit" name="buttery" value="{{buttery}}">{{buttery}}</button>
             </form>
         {% endfor %}
     </div>
