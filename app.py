@@ -713,7 +713,7 @@ def b_orderQueue():
     orders = Order.query.filter_by(
         buttery_id=buttery.buttery_id
     ).filter(
-        Order.status.in_(['pending', 'ready', 'completed'])
+        Order.status.in_(['pending', 'ready', 'picked up'])
     ).all()
     
     # Format orders for template

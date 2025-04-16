@@ -9,6 +9,54 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            color: #0d2d63;
+        }
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .pending-orders .order-item {
+            border-left: 5px solid #ff9800;
+        }
+        .ready-orders .order-item {
+            border-left: 5px solid #4CAF50;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ff9800;
+            color: white;
+        }
+        .status-ready {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .order-header h3 {
+            margin: 0;
+        }
+        .order-items {
+            margin-left: 20px;
+        }
+        .order-items li {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,13 +65,15 @@
     <div class="container-fluid">
         <h2>Your Orders</h2>
         {% if orders %}
-            <ul>
+            <div class="orders-list">
                 {% for order in orders %}
-                    <li>
-                        <h4>{{order.buttery}}</h4>
-                        <p>Status: {{order.status}}</p>
+                    <div class="order-item {% if order.status == 'pending' %}pending-orders{% else %}ready-orders{% endif %}">
+                        <div class="order-header">
+                            <h3>{{order.buttery}}</h3>
+                            <p><span class="status-badge {% if order.status == 'pending' %}status-pending{% else %}status-ready{% endif %}">{{order.status|title}}</span></p>
+                        </div>
                         
-                        <ul>
+                        <ul class="order-items">
                             {% for item in order.order_items %}
                                 <li>
                                     {{item.quantity}}x {{item.name}}
@@ -35,10 +85,9 @@
                             {% endfor %}
                         </ul>
                         <p><strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong></p>
-                    </li>
-                    <hr>
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% else %}
             <p>No orders in progress.</p>
         {% endif %}
