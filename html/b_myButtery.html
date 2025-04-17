@@ -24,21 +24,60 @@
     <h2>{{buttery}}</h2>
     <br>
 
-    <div style="width: fit-content">
-        {% for i in range(menuItems|length) %} 
-            <!-- <form action="b_delete_item" method="post"> -->
-                <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
-                <a href="{{ url_for('b_display_item', item_id=itemIDs[i]) }}" style="padding-right:20px">{{menuItems[i]}}</a>
+    <div style="border: 3px solid blue; display: flex">
+
+        <div style="width: fit-content; border: 3px solid; flex: 1">
+            {% for i in range(menuItems|length) %} 
+                <!-- <form action="b_delete_item" method="post"> -->
+                    <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
+                    <a href="{{ url_for('b_display_item', item_id=itemIDs[i]) }}" style="padding-right:20px">{{menuItems[i]}}</a>
+                    <br>
+                    <!-- <input type="hidden" name="menu_item" value="{{menuItems[i]}}">
+                    <input type="submit" name="delete" value="Delete" style="float: right">
+                </form> -->
                 <br>
-                <!-- <input type="hidden" name="menu_item" value="{{menuItems[i]}}">
-                <input type="submit" name="delete" value="Delete" style="float: right">
-            </form> -->
-            <br>
-        {% endfor %}
-        <form action="b_create_item" method="get">
-            <input type="submit" name="create_item" value="Create new menu item">
-        </form>
+            {% endfor %}
+            <form action="b_create_item" method="get">
+                <input type="submit" name="create_item" value="Create new menu item">
+            </form>
+        </div>
+    
+        <!-- ingredient list that the buttery can mark as out of stock -->
+         <div style="width: 25%; float: right; border: 3px solid">
+            Mark ingredients below as out of stock/not in use.
+            
+            <br><br>
+
+            <table style="text-align: center; margin: auto;">
+                <thead>
+                    <tr>
+                        <th>Ingredients</th>
+                    </tr>
+                </thead>
+                {% for ingredient_name in ingredient_names %}
+                <tbody>
+                    <tr>
+                        <td onclick="ingredOutOfStock(this)">{{ingredient_name}}</td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
+         </div>
+
     </div>
+
+    <!-- so we can mark out of stock without reloading page -->
+    <script src=
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+
+    <script>
+        function ingredOutOfStock(element) {
+            element.classList.toggle("outOfStock");
+            // also denote that item is out of stock, store it in a set? i should probably store in database
+            
+        }
+    </script>
 </body>
 
 </html>

@@ -33,3 +33,22 @@ h1 {
     display: inline;
 }
 
+/* for ingredients table */
+td, th {
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 2px solid lightgray;
+}
+
+td:hover {
+    background-color: lightgray;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.outOfStock {
+    background-color: lightgray;
+    text-decoration: line-through;
+}

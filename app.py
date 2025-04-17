@@ -563,11 +563,16 @@ def b_myButtery():
         buttery_id=buttery.buttery_id,
         is_available=True
     ).all()
+
+    # Get all ingredients of menu items for this buttery
+    # ! we could limit to the ingredients used just by this buttery
+    ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
     
     html = render_template('b_myButtery.html', 
                          buttery=buttery_name,
                          menuItems=[item.item_name for item in menu_items],
-                         itemIDs=[item.menu_item_id for item in menu_items])
+                         itemIDs=[item.menu_item_id for item in menu_items],
+                         ingredient_names=[ingredient for ingredient in ingredients])
     response = make_response(html)
 
     return response
@@ -771,10 +776,10 @@ def b_create_item():
     if not buttery:
         return redirect(url_for('b_login'))
     
-    if request.method == 'GET':
+    if request.method == 'GET': 
         return render_template('b_create_item.html', 
                              buttery=buttery_name,
-                             ingredients=ingredients,
+                             ingredients=ingredients, # ! note that this is not used anywhere
                              item_ingredients=item_ingredients)
         
     elif request.method == 'POST':
