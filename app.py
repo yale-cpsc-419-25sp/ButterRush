@@ -1,6 +1,6 @@
 """ Module for our Flask app """
 
-from flask import Flask, request, make_response, redirect, url_for, render_template
+from flask import Flask, request, make_response, redirect, url_for, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
 # import yagmail
@@ -25,6 +25,9 @@ app = Flask(__name__, template_folder='./html')
 # os.path.abspath() converts it to an absolute path
 # This ensures the database file is created in the correct location regardless of where you run the app from
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Sets secret key for session signing
+app.secret_key = os.getenv("SECRET_KEY", "dev_key")
 
 # Sets up the database connection string
 # sqlite:/// specifies we're using SQLite
@@ -91,7 +94,8 @@ def u_createAccount():
         db.session.commit()
         
         response = make_response(redirect("/u_butteries"))
-        response.set_cookie('user_id', str(new_user.user_id))
+        # response.set_cookie('user_id', str(new_user.user_id))
+        session['user_id'] = str(new_user.user_id)
         return response
     
     return render_template('u_createAccount.html')
@@ -103,16 +107,19 @@ def u_createAccount():
 @app.route('/u_login', methods=['GET'])
 def u_login():
 
-    error_msg = request.cookies.get('error_msg')
+    # error_msg = request.cookies.get('error_msg')
+    error_msg = session.get('error_msg', None)
     if error_msg is None:
         error_msg = ''
 
     # remember the user
-    username = request.cookies.get('username')
+    # username = request.cookies.get('username')
+    username = session.get('username', None)
     if username is None:
         username = ''
 
-    password = request.cookies.get('password')
+    # password = request.cookies.get('password')
+    password = session.get('password', None)
     if password is None:
         password = ''
 
@@ -121,8 +128,10 @@ def u_login():
                            password=password)
     response = make_response(html)
 
-    response.set_cookie('username', username)  # ! we need this so that if we reload this page we still have username and password
-    response.set_cookie('password', password)
+    # response.set_cookie('username', username)  # ! we need this so that if we reload this page we still have username and password
+    # response.set_cookie('password', password)
+    session['username'] = username
+    session['password'] = password
     return response
 
 #-----------------------------------------------------------------------
@@ -134,19 +143,22 @@ def u_login_submit():
 
     if not (username and password):
         response = redirect(url_for('u_login'))
-        response.set_cookie('error_msg', 'Username or password empty.')
+        # response.set_cookie('error_msg', 'Username or password empty.')
+        session['error_msg'] = 'Username or password empty.'
         return response
 
     user = User.query.filter_by(username=username).first()
     
     if not user:
         response = redirect(url_for('u_login'))
-        response.set_cookie('error_msg', 'Username not found.')
+        session['error_msg'] = 'Username not found.'
+        # response.set_cookie('error_msg', 'Username not found.')
         return response
 
     if user.password_hash != password:  # Should use proper password verification
         response = redirect(url_for('u_login'))
-        response.set_cookie('error_msg', 'Incorrect password.')
+        session['error_msg'] = 'Incorrect password.'
+        # response.set_cookie('error_msg', 'Incorrect password.')
         return response
 
     # Update last login
@@ -154,14 +166,20 @@ def u_login_submit():
     db.session.commit()
 
     response = make_response(redirect(url_for('u_butteries')))
-    response.set_cookie('user_id', str(user.user_id))
-    response.set_cookie('u_username', username)
+    # response.set_cookie('user_id', str(user.user_id))
+    # response.set_cookie('u_username', username)
+    session['user_id'] = str(user.user_id)
+    session['u_username'] = username
     return response
 
 #-----------------------------------------------------------------------
 
 @app.route('/u_butteries', methods=['GET'])  
 def u_butteries():
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
     butteries = Buttery.query.all()
     return render_template('u_butteries.html', 
                          butteries=[b.buttery_name for b in butteries])
@@ -170,6 +188,10 @@ def u_butteries():
 
 @app.route('/u_get_buttery_menu', methods=['GET'])
 def u_get_buttery_menu():
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
     buttery_name = request.args.get('buttery')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
@@ -187,6 +209,10 @@ def u_get_buttery_menu():
 
 @app.route('/u_display_item', methods=['GET'])
 def u_display_item():
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
     buttery = request.args.get('buttery')
     menu_item_name = request.args.get('menu_item')
     
@@ -208,6 +234,10 @@ def u_display_item():
 
 @app.route('/u_add_to_cart', methods=['POST'])
 def u_add_to_cart():
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
     try:
         menu_item = request.form.get('menu_item')
         buttery = request.form.get('buttery')
@@ -228,8 +258,9 @@ def u_add_to_cart():
             return "Menu item not found", 404
 
         # Get current cart or initialize empty cart
-        cart_cookie = request.cookies.get('cart')
-        cart = json.loads(cart_cookie) if cart_cookie else []
+        # cart_cookie = request.cookies.get('cart')
+        # cart = json.loads(cart_cookie) if cart_cookie else []
+        cart = session.get('cart', [])
 
         # Add new item to cart with all necessary data
         cart.append({
@@ -244,7 +275,8 @@ def u_add_to_cart():
 
         # Create response with updated cart
         response = make_response(redirect(url_for('u_cart')))
-        response.set_cookie('cart', json.dumps(cart))
+        # response.set_cookie('cart', json.dumps(cart))
+        session['cart'] = cart
         return response
 
     except Exception as e:
@@ -254,17 +286,35 @@ def u_add_to_cart():
 
 @app.route('/u_cart', methods=['GET'])
 def u_cart():
-    cart_cookie = request.cookies.get('cart')
-    if cart_cookie:
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
+    # cart_cookie = request.cookies.get('cart')
+    # if cart_cookie:
+    #     try:
+    #         cart = json.loads(cart_cookie)
+    #         # Filter out any invalid items from the cart
+    #         valid_cart = []
+    #         for item in cart:
+    #             if isinstance(item, dict) and 'menu_item' in item and item['menu_item']:
+    #                 valid_cart.append(item)
+    #         cart = valid_cart
+    #     except (json.JSONDecodeError, KeyError):
+    #         cart = []
+    # else:
+    #     cart = []
+
+    cart = session.get('cart', [])
+    if cart:
         try:
-            cart = json.loads(cart_cookie)
             # Filter out any invalid items from the cart
             valid_cart = []
             for item in cart:
                 if isinstance(item, dict) and 'menu_item' in item and item['menu_item']:
                     valid_cart.append(item)
             cart = valid_cart
-        except (json.JSONDecodeError, KeyError):
+        except (KeyError):
             cart = []
     else:
         cart = []
@@ -275,26 +325,39 @@ def u_cart():
 
 @app.route('/u_remove_from_cart', methods=['POST'])
 def u_remove_from_cart():
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
     index = int(request.form.get('index'))
 
-    cart_cookie = request.cookies.get('cart')
-    cart = json.loads(cart_cookie) if cart_cookie else []
+    # cart_cookie = request.cookies.get('cart')
+    # cart = json.loads(cart_cookie) if cart_cookie else []
+    cart = session.get('cart', [])
 
     # remove item if index is valid
     if 0 <= index < len(cart):
         cart.pop(index)
 
     response = make_response(redirect(url_for('u_cart')))
-    response.set_cookie('cart', json.dumps(cart))
+    # response.set_cookie('cart', json.dumps(cart))
+    session['cart'] = cart
     return response
 
 #-----------------------------------------------------------------------
 
 @app.route('/u_submit_order', methods=['POST'])
 def u_submit_order():
-    cart_cookie = request.cookies.get('cart')
-    cart = json.loads(cart_cookie) if cart_cookie else []
-    user_id = int(request.cookies.get('user_id'))
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
+    # cart_cookie = request.cookies.get('cart')
+    # cart = json.loads(cart_cookie) if cart_cookie else []
+    # user_id = int(request.cookies.get('user_id'))
+
+    cart = session.get('cart', [])
+    user_id = int(session.get('user_id'))
     
     if not cart:
         return redirect(url_for('u_cart'))
@@ -330,16 +393,26 @@ def u_submit_order():
     db.session.commit()
     
     response = make_response(redirect(url_for('u_ordersIP')))
-    response.set_cookie('cart', '', expires=0)  # Clear cart
+    # response.set_cookie('cart', '', expires=0)  # Clear cart
+    session.pop('cart', None)
     return response
 
 #-----------------------------------------------------------------------
 
 @app.route('/u_ordersIP', methods=['GET'])  
 def u_ordersIP():
-    user_id = request.cookies.get('user_id')
-    if not user_id:
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
         return redirect(url_for('u_login'))
+    
+    # user_id = request.cookies.get('user_id')
+    # if not user_id:
+    #     return redirect(url_for('u_login'))
+
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    user_id = session.get('user_id')
     
     # Get all non-completed orders for this user
     orders = Order.query.filter_by(
@@ -377,7 +450,12 @@ def u_ordersIP():
 
 @app.route('/u_account', methods=['GET'])  
 def u_account():
-    html = render_template('u_account.html', username=request.cookies.get('u_username'))
+    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
+    html = render_template('u_account.html', username=session.get('u_username'))
+    # html = render_template('u_account.html', username=request.cookies.get('u_username'))
     response = make_response(html)
     
     return response
@@ -389,16 +467,19 @@ def u_account():
 @app.route('/b_login', methods=['GET'])
 def b_login():
 
-    error_msg = request.cookies.get('error_msg')
+    # error_msg = request.cookies.get('error_msg')
+    error_msg = session.get('error_msg', None)
     if error_msg is None:
         error_msg = ''
 
     # remember the user
-    username = request.cookies.get('username')
+    # username = request.cookies.get('username')
+    username = session.get('username', None)
     if username is None:
         username = ''
 
-    password = request.cookies.get('password')
+    # password = request.cookies.get('password')
+    password = session.get('password', None)
     if password is None:
         password = ''
 
@@ -407,8 +488,10 @@ def b_login():
                            password=password)
     response = make_response(html)
 
-    response.set_cookie('username', username)
-    response.set_cookie('password', password)
+    # response.set_cookie('username', username)
+    # response.set_cookie('password', password)
+    session['username'] = username
+    session['password'] = password
     return response
 
 #-----------------------------------------------------------------------
@@ -424,7 +507,8 @@ def b_login_submit():
     if (username.strip() == '' or password.strip() == ''):
         response = redirect(url_for('b_login'))
         error_msg = 'Username or password empty.'
-        response.set_cookie('error_msg', error_msg)
+        # response.set_cookie('error_msg', error_msg)
+        session['error_msg'] = error_msg
 
     else:
         # Query the Buttery from database instead of using BUTTERY_PASSWORD_DB
@@ -433,21 +517,27 @@ def b_login_submit():
         if not buttery:
             response = redirect(url_for('b_login'))
             error_msg = 'Username not found. Create an account.'
-            response.set_cookie('error_msg', error_msg)
+            # response.set_cookie('error_msg', error_msg)
+            session['error_msg'] = error_msg
 
         # TODO: Add proper password handling here
         elif password != 'temp_password':  # Temporary solution - should use proper password handling
             response = redirect(url_for('b_login'))
             error_msg = 'Password incorrect.'
-            response.set_cookie('error_msg', error_msg)
+            # response.set_cookie('error_msg', error_msg)
+            session['error_msg'] = error_msg
 
         else:
             html = redirect(url_for('b_myButtery'))
             response = make_response(html)
-            response.set_cookie('error_msg', '')
+            # response.set_cookie('error_msg', '')
+            error_msg = ''
+            session['error_msg'] = error_msg
 
-    response.set_cookie('username', username) 
-    response.set_cookie('password', password)
+    # response.set_cookie('username', username) 
+    # response.set_cookie('password', password)
+    session['username'] = username
+    session['password'] = password
 
     return response
 
@@ -455,8 +545,13 @@ def b_login_submit():
 
 @app.route('/b_myButtery', methods=['GET'])  
 def b_myButtery():
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
     # Get the buttery name from cookie
-    buttery_name = request.cookies.get('username')
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     
     # Get the buttery and its menu items from database
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
@@ -481,12 +576,17 @@ def b_myButtery():
 
 @app.route('/b_display_item/<string:item_id>', methods=['GET', 'POST'])
 def b_display_item(item_id):
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
     try:
         item_id = int(item_id)
     except ValueError:
         return redirect(url_for('b_myButtery'))
     
-    buttery_name = request.cookies.get('username')
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     menu_item = MenuItem.query.filter_by(
@@ -531,6 +631,10 @@ def b_display_item(item_id):
 
 @app.route('/b_edit_item_ingredients/<string:item_id>', methods=['GET', 'POST'])
 def b_edit_item_ingredients(item_id):
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
     try:
         item_id = int(item_id)
     except ValueError:
@@ -546,7 +650,8 @@ def b_edit_item_ingredients(item_id):
     
     ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
     
-    buttery_name = request.cookies.get('username')
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
     if request.method == 'GET':
@@ -617,8 +722,13 @@ def b_edit_item_ingredients(item_id):
 
 @app.route('/b_delete_item', methods=['POST'])
 def b_delete_item():
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
     menu_item_name = request.form.get('menu_item')
-    buttery_name = request.cookies.get('username')
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     
     # Get menu item from database
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
@@ -641,7 +751,12 @@ def b_delete_item():
 
 @app.route('/b_create_item', methods=['GET', 'POST'])
 def b_create_item():
-    item_ingredients = request.cookies.get('item_ingredients')
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
+    # item_ingredients = request.cookies.get('item_ingredients')
+    item_ingredients = session.get('item_ingredients')
     pending = ""
     if item_ingredients:
         item_ingredients = item_ingredients.split(",")
@@ -650,7 +765,8 @@ def b_create_item():
         
     ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
     
-    buttery_name = request.cookies.get('username')
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     if not buttery:
         return redirect(url_for('b_login'))
@@ -703,7 +819,12 @@ def b_create_item():
 
 @app.route('/b_orderQueue', methods=['GET']) 
 def b_orderQueue():
-    buttery_name = request.cookies.get('username')
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
     if not buttery:
@@ -772,6 +893,10 @@ async def send_email(email, message):
 
 @app.route('/b_update_order_status', methods=['POST'])
 def b_update_order_status():
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
     order_id = request.form.get('order_id')
     new_status = request.form.get('status')
 
@@ -796,7 +921,12 @@ def b_update_order_status():
 
 @app.route('/b_account', methods=['GET']) 
 def b_account():
-    buttery_name = request.cookies.get('username')
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
     if not buttery:
@@ -811,7 +941,12 @@ def b_account():
 
 @app.route('/b_update_hours', methods=['POST'])
 def b_update_hours():
-    buttery_name = request.cookies.get('username')
+    # TODO: Should we check for 'username' or sth else?
+    if session.get('username') is None:
+        return redirect(url_for('b_login'))
+    
+    # buttery_name = request.cookies.get('username')
+    buttery_name = session.get('username')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
     if not buttery:
@@ -831,8 +966,9 @@ def logout():
     # clear cookies
     html = redirect(url_for("home"))
     response = make_response(html)
-    response.set_cookie('username', '')
-    response.set_cookie('password', '')
+    # response.set_cookie('username', '')
+    # response.set_cookie('password', '')
+    session.clear()
     
     return response
 
@@ -842,15 +978,17 @@ def u_update_quantity():
     index = int(request.form.get('index'))
     new_quantity = int(request.form.get('quantity'))
     
-    cart_cookie = request.cookies.get('cart')
-    cart = json.loads(cart_cookie) if cart_cookie else []
+    # cart_cookie = request.cookies.get('cart')
+    # cart = json.loads(cart_cookie) if cart_cookie else []
+    cart = session.get('cart', [])
     
     # Update quantity if index is valid
     if 0 <= index < len(cart):
         cart[index]['quantity'] = new_quantity
     
     response = make_response(redirect(url_for('u_cart')))
-    response.set_cookie('cart', json.dumps(cart))
+    # response.set_cookie('cart', json.dumps(cart))
+    session['cart'] = cart
     return response
 
 # allows checked items to persist when order status is updated
