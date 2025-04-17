@@ -1040,7 +1040,7 @@ def b_toggleIngredientOOS():
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            print("Setting available", menu_item.item_name)
+            # print("Setting available", menu_item.item_name)
             menu_item.is_available = True
 
         db.session.commit()
@@ -1051,13 +1051,12 @@ def b_toggleIngredientOOS():
         db.session.commit()
 
         # now, need to make corresponding menu items disappear
-        # ! am not differentiating by buttery id here
         menu_item_ingreds = MenuItemIngredient.query.filter_by(ingredient_id=ingredient_id).all()
         menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            print("Setting unvailable", menu_item.item_name)
+            # print("Setting unvailable", menu_item.item_name)
             menu_item.is_available = False
 
         db.session.commit()

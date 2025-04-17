@@ -24,9 +24,9 @@
     <h2>{{buttery}}</h2>
     <br>
 
-    <div style="border: 3px solid blue; display: flex">
+    <div style="display: flex; padding: 20px 20px 20px 20px;">
 
-        <div style="width: fit-content; border: 3px solid; flex: 1">
+        <div style="width: fit-content; flex: 1;">
             {% for i in range(menuItems|length) %} 
                 <!-- <form action="b_delete_item" method="post"> -->
                     <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
@@ -43,7 +43,7 @@
         </div>
     
         <!-- ingredient list that the buttery can mark as out of stock -->
-         <div style="width: 25%; float: right; border: 3px solid">
+         <div class="ingredientList" style="width: 30%; float: right; ">
             Mark ingredients below as out of stock/not in use.
             
             <br><br>
@@ -66,7 +66,7 @@
 
     </div>
 
-    <!-- so we can mark out of stock without reloading page -->
+    <!-- maybe standardize how we are calling ajax -->
     <script src=
         "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">
     </script>
@@ -80,7 +80,7 @@
             let element = document.getElementById(ingredientId);
             element.classList.toggle("outOfStock");
 
-            console.log(ingredientId);
+            // console.log(ingredientId);
 
             // change backend db
             let url = "/b_toggleIngredientOOS"
