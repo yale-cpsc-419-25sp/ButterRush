@@ -1026,9 +1026,10 @@ def b_toggleIngredientOOS():
     
     ingredient_id = data.get('ingredient_id')
     buttery_id = data.get('buttery_id')
+    set_unavailable = data.get('set_unavailable')
 
     oos = OOSIngredient.query.filter_by(ingredient_id=ingredient_id, buttery_id=buttery_id).first()
-    if oos:
+    if oos and not set_unavailable:
         db.session.delete(oos)
         db.session.commit()
 
@@ -1044,7 +1045,7 @@ def b_toggleIngredientOOS():
 
         db.session.commit()
 
-    else:
+    elif oos is None and set_unavailable:
         new_oos = OOSIngredient(ingredient_id=ingredient_id, buttery_id=buttery_id)
         db.session.add(new_oos)
         db.session.commit()
