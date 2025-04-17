@@ -52,7 +52,7 @@ def init_db():
         # Initialize menu items with prices and categories
         # Replaces BUTTERY_MENU_DB dictionary
 
-        # WILL NEED TO CHANGE THIS TO BE DYNAMIC
+        # ! WILL NEED TO CHANGE THIS TO BE DYNAMIC
         davenport = Buttery.query.filter_by(buttery_name='Davenport').first()
         cheese = Ingredient.query.filter_by(ingredient_name='Cheese').first()
         tortilla = Ingredient.query.filter_by(ingredient_name='Flour tortilla').first()

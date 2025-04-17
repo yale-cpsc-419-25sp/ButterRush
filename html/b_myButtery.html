@@ -30,7 +30,7 @@
             {% for i in range(menuItems|length) %} 
                 <!-- <form action="b_delete_item" method="post"> -->
                     <!-- <input type="submit" name="menu_item" value="{{menuItem}}"> -->
-                    <a href="{{ url_for('b_display_item', item_id=itemIDs[i]) }}" style="padding-right:20px">{{menuItems[i]}}</a>
+                    <a href="{{ url_for('b_display_item', item_id=itemIDs[i]) }}" style="padding-right:20px">{{menuItems[i].item_name}}</a>
                     <br>
                     <!-- <input type="hidden" name="menu_item" value="{{menuItems[i]}}">
                     <input type="submit" name="delete" value="Delete" style="float: right">
@@ -54,10 +54,10 @@
                         <th>Ingredients</th>
                     </tr>
                 </thead>
-                {% for ingredient_name in ingredient_names %}
+                {% for ingredient in ingredients %}
                 <tbody>
                     <tr>
-                        <td onclick="ingredOutOfStock(this)">{{ingredient_name}}</td>
+                        <td id="{{ingredient.ingredient_id}}" onclick="ingredOutOfStock('{{ingredient.ingredient_id}}', '{{buttery_id}}')">{{ingredient.ingredient_name}}</td>
                     </tr>
                 </tbody>
                 {% endfor %}
@@ -72,10 +72,25 @@
     </script>
 
     <script>
-        function ingredOutOfStock(element) {
+        'use strict';
+
+        let request = null; // needs to go after handleResponse
+
+        function ingredOutOfStock(ingredientId, butteryId) {
+            let element = document.getElementById(ingredientId);
             element.classList.toggle("outOfStock");
-            // also denote that item is out of stock, store it in a set? i should probably store in database
-            
+
+            console.log(ingredientId);
+
+            // change backend db
+            let url = "/b_toggleIngredientOOS"
+
+            request = $.ajax({
+               type: 'POST',
+               url: url,
+               data: JSON.stringify({ingredient_id: ingredientId, buttery_id: butteryId, set_unavailable: element.classList.contains("outOfStock")}), // ! this could be incredibly not optimal! 
+               contentType: 'application/json'
+            });
         }
     </script>
 </body>

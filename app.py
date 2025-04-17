@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 # import yagmail
 import smtplib
 import asyncio
-from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient
+from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient, OOSIngredient
 from datetime import datetime
 import json
 import os
@@ -566,13 +566,14 @@ def b_myButtery():
 
     # Get all ingredients of menu items for this buttery
     # ! we could limit to the ingredients used just by this buttery
-    ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
+    ingredients = [ingredient for ingredient in Ingredient.query.all()]
     
     html = render_template('b_myButtery.html', 
                          buttery=buttery_name,
-                         menuItems=[item.item_name for item in menu_items],
+                         menuItems=menu_items,
                          itemIDs=[item.menu_item_id for item in menu_items],
-                         ingredient_names=[ingredient for ingredient in ingredients])
+                         ingredients=ingredients,
+                         buttery_id=buttery.buttery_id)
     response = make_response(html)
 
     return response
@@ -1015,5 +1016,49 @@ def b_update_item_check():
         order_item.checked = checked
         db.session.commit()
         print(f"Updated checked status to: {checked}")  # Debug print
+    
+    return '', 200
+
+# toggles when item is OOS
+@app.route('/b_toggleIngredientOOS', methods=['POST'])
+def b_toggleIngredientOOS():
+    data = request.get_json()
+    
+    ingredient_id = data.get('ingredient_id')
+    buttery_id = data.get('buttery_id')
+
+    oos = OOSIngredient.query.filter_by(ingredient_id=ingredient_id, buttery_id=buttery_id).first()
+    if oos:
+        db.session.delete(oos)
+        db.session.commit()
+
+        # now, need to make corresponding menu items reappear
+        # ! am not differentiating by buttery id here
+        menu_item_ingreds = MenuItemIngredient.query.filter_by(ingredient_id=ingredient_id).all()
+        menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
+        menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
+
+        for menu_item in menu_items:
+            print("Setting available", menu_item.item_name)
+            menu_item.is_available = True
+
+        db.session.commit()
+
+    else:
+        new_oos = OOSIngredient(ingredient_id=ingredient_id, buttery_id=buttery_id)
+        db.session.add(new_oos)
+        db.session.commit()
+
+        # now, need to make corresponding menu items disappear
+        # ! am not differentiating by buttery id here
+        menu_item_ingreds = MenuItemIngredient.query.filter_by(ingredient_id=ingredient_id).all()
+        menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
+        menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
+
+        for menu_item in menu_items:
+            print("Setting unvailable", menu_item.item_name)
+            menu_item.is_available = False
+
+        db.session.commit()
     
     return '', 200

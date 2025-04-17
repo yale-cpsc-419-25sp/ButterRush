@@ -92,3 +92,12 @@ class OrderItem(db.Model):
     note = db.Column(db.String)
     item_price = db.Column(db.Numeric(10,2), nullable=False)
     checked = db.Column(db.Boolean, default=False)  # For buttery to track completion 
+
+# ! using a DB for this right now, so it will persist and stuff
+# junction table for many-to-many relationship, contains the ingredients in each buttery that are OOS (out of stock)
+class OOSIngredient(db.Model):
+    __tablename__ = "oos_ingredients"
+
+    oos_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    buttery_id = db.Column(db.Integer, db.ForeignKey('butteries.buttery_id'), nullable=False)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('ingredients.ingredient_id'), nullable=False)
