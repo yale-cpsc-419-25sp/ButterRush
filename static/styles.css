@@ -65,3 +65,7 @@ td:hover {
     border-radius: 10px;
     box-shadow: 0px 0px 10px gray;
 }
+
+.buttery-menu, .menu-item {
+    padding-left: 20px;
+}
