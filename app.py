@@ -1039,6 +1039,7 @@ def b_toggleIngredientOOS():
         menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
+        # !!!! NEED TO DEBUG
         for menu_item in menu_items:
             # print("Setting available", menu_item.item_name)
             menu_item.is_available = True
