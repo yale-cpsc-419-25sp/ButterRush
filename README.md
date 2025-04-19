@@ -31,8 +31,10 @@ MVP Figma Wireframe: https://www.figma.com/design/LjKQgS0H2t7sxeloq0wsxY/Butterr
 Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/ButterRush-Mockup?node-id=706-2&t=QNjWS0G9IW2NYc2R-1  
 
 ## What we’ve implemented (Beta): 
-- Improved and more consistent UI
-- Bug fixes: email, order queue 
+- Improved and more consistent UI using boostrap
+- Added navbar to buttery side
+- Implemented login sessions 
+- Bug fixes: email, order queue
 - Feature that allows butteries to mark ingredients as in or out of stock 
 
 ## Implementation Instructions: 
@@ -40,7 +42,7 @@ Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/Butte
 *NOTE: This is optional, but in order to send emails you must set `MAIL_USERNAME` and `MAIL_PASSWORD` in your terminal. This requires setting up an app password to login to your email account. To do this, please follow the instructions from your email service provider (likely found within the "Security" section of your email account settings). After accomplishing this, please run `export MAIL_USERNAME="[your_email]"` and `export MAIL_PASSWORD="[your_email_app_password]"` to set the necessary environment variables. In the future, we will use a standard ButterRush address from which to send emails, so this is a temporary solution.*
 
 To run ButterRush, do `pip install -r requirements.txt`. 
-Then, delete the current database if it is present (which would be named `butterrush.db`) and run `python3 init_db.py` to initalize the database.
+Then, delete the current database if it is present (which would be named `butterrush.db`) and run `python init_db.py` to initalize the database.
 Then, `python runserver.py [a valid port number]`.
 
 Example Buttery Login: 
@@ -56,4 +58,4 @@ Changing opening hours is a feature available in the Account tab on the buttery 
 
 Issues to Address/Implement in the Future: 
 
-- There is a slight bug with marking ingredients as out of stock. Right now, when an ingredient is marked as in stock, we mark the menu item as "available" without checking if its other ingredients are still out of stock. 
+- There is a slight bug with marking ingredients as out of stock. Right now, when an ingredient is marked as in stock, we mark the menu item as "available" without checking if its other ingredients are still out of stock. This can be fixed with a for loop.
