@@ -26,9 +26,14 @@ MVP Figma Wireframe: https://www.figma.com/design/LjKQgS0H2t7sxeloq0wsxY/Butterr
 - User can submit multi-item order(s)
 - Users can add items to / delete from a cart before ordering
 - Buttery workers can mark an order as “in progress” or “done”*, shows on user page and notifies them through email
-- EXTRA FEATURE: allow buttery to edit opening times – maybe this should be limited to within regular hours?
+- EXTRA FEATURE: allow buttery to edit opening times 
 
 Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/ButterRush-Mockup?node-id=706-2&t=QNjWS0G9IW2NYc2R-1  
+
+## What we’ve implemented (Beta): 
+- Improved and more consistent UI
+- Bug fixes: email, order queue 
+- Feature that allows butteries to mark ingredients as in or out of stock 
 
 ## Implementation Instructions: 
 
@@ -36,8 +41,7 @@ Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/Butte
 
 To run ButterRush, do `pip install -r requirements.txt`. 
 Then, delete the current database if it is present (which would be named `butterrush.db`) and run `python3 init_db.py` to initalize the database.
-Then, `flask run`.
-
+Then, `python runserver.py [a valid port number]`.
 
 Example Buttery Login: 
 username: “Davenport” 
@@ -46,10 +50,10 @@ password: “temp_password”
 Example User Login: 
 username: “ayak” 
 password: “12345678”
-*NOTE: You may have to first create an account in order to login as a student.*
+*NOTE: You may have to first create an account in order to login as a user.*
 
 Changing opening hours is a feature available in the Account tab on the buttery side
 
 Issues to Address/Implement in the Future: 
 
-- Somewhere along our branch merging, the funtionality of the Buttery Order queue broke. Currently, when the buttery marks an item as Ready, the order disapears from the queue rather than remain on the queue with a "Mark as Picked Up" option. We will fix this in the next version!
+- There is a slight bug with marking ingredients as out of stock. Right now, when an ingredient is marked as in stock, we mark the menu item as "available" without checking if its other ingredients are still out of stock. 
