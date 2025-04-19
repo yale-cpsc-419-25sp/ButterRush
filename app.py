@@ -1039,10 +1039,14 @@ def b_toggleIngredientOOS():
         menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
-        # !!!! NEED TO DEBUG
         for menu_item in menu_items:
-            # print("Setting available", menu_item.item_name)
-            menu_item.is_available = True
+            available = True
+
+            for ingredient in menu_item.ingredients: # only make reappear if rest of ingredients also in stock
+                if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
+                    available = False
+                    break
+            menu_item.is_available = available
 
         db.session.commit()
 
@@ -1057,7 +1061,6 @@ def b_toggleIngredientOOS():
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            # print("Setting unvailable", menu_item.item_name)
             menu_item.is_available = False
 
         db.session.commit()
