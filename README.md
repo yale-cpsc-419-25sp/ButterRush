@@ -58,4 +58,4 @@ Changing opening hours is a feature available in the Account tab on the buttery 
 
 Issues to Address/Implement in the Future: 
 
-- There is a slight bug with marking ingredients as out of stock. Right now, when an ingredient is marked as in stock, we mark the menu item as "available" without checking if its other ingredients are still out of stock. This can be fixed with a for loop.
+- Any bugs that we find! 
