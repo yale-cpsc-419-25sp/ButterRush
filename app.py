@@ -617,34 +617,29 @@ def b_display_item(item_id):
     
     if request.method == "GET":
         html = render_template('b_menuItem.html',
-                            ingredients=[ing.ingredient_name for ing in menu_item.ingredients],
-                            buttery=buttery_name,
-                            menuItem=menu_item.item_name,
-                            price=menu_item.price,
-                            description=menu_item.description,
-                            category=menu_item.category,
-                            edit_mode=True,
-                            menuItemID=menu_item.menu_item_id)
+                        ingredients=[ing.ingredient_name for ing in menu_item.ingredients],
+                        buttery=buttery_name,
+                        menuItem=menu_item.item_name,
+                        price=menu_item.price,
+                        description=menu_item.description,
+                        category=menu_item.category,
+                        edit_mode=True,
+                        menuItemID=menu_item.menu_item_id)
         response = make_response(html)
         return response
 
     elif request.method == "POST":
-        action = request.form.get('action')
-        if action == "edit_ingredients":
+        post_action = request.form.get('action')
+        if post_action == "delete":
+            print("here")
+            db.session.delete(menu_item)
+            db.session.commit()
+            return redirect(url_for('b_myButtery'))
+        
+        elif post_action == "edit_ingredients":
             return redirect(url_for('b_edit_item_ingredients', item_id=item_id ))
 
-# # FROM OTHER FUNCTION 
-#             elif action == "remove_ingredient":
-
-            
-#             db.session.delete(item_ingredient)
-            
-#             db.session.commit()
-#             return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
-
-
-
-        if action == "edit_item":
+        elif post_action == "edit_item":
             item_name = request.form.get('item_name')
             price = request.form.get('price')
             description = request.form.get('description')
