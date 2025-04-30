@@ -93,7 +93,7 @@
                                         {% for item in order.order_items %}
                                             <li>
                                                 <input type="checkbox" 
-                                                       onchange="updateItemCheck({{order.id}}, {{item.id}}, this.checked)"
+                                                       onchange="updateItemCheck({{order.id}}, {{item.order_item_id}}, this.checked)"
                                                        {% if item.checked %}checked{% endif %}>
                                                 {{item.quantity}}x {{item.name}}
                                                 {% if item.note %}
