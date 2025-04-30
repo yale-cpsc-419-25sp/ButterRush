@@ -19,7 +19,12 @@
             </div>
         </div>
         <div class="card-body p-4">
-            <p class="small text-danger">{{error_msg}}</p>
+            {% if error_msg %}
+                <p class="small text-danger">{{error_msg}}</p>
+            {% endif %}
+            {% if success_msg %}
+                <p class="small text-success">{{success_msg}}</p>
+            {% endif %}
 
             <form action="u_login_submit" method="get">
                 <!-- Email Component -->

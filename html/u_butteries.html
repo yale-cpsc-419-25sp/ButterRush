@@ -20,6 +20,10 @@
             border-color: #0a234a;
             color: white;
         }
+        .welcome-message {
+            color: #0d2d63;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -35,6 +39,13 @@
 
     <!-- list of butteries -->
     <div class="container-fluid">
+        <!-- Welcome message with username -->
+        <div class="welcome-message">
+            <h2>Welcome, {{ username }}!</h2>
+            <p>Select a buttery to view its menu:</p>
+        </div>
+
+        <!-- list of butteries -->
         {% for buttery in butteries %}
             <form action="u_get_buttery_menu" method="get">
                 <button class="btn buttery-btn m-1" type="submit" name="buttery" value="{{buttery}}">{{buttery}}</button>

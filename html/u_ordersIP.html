@@ -19,18 +19,19 @@
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 5px;
+            max-width: 500px;
         }
-        .pending-orders .order-item {
+        .order-item.pending {
             border-left: 5px solid #ff9800;
         }
-        .ready-orders .order-item {
+        .order-item.ready {
             border-left: 5px solid #4CAF50;
         }
         .status-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 1em;
             font-weight: bold;
         }
         .status-pending {
@@ -56,41 +57,54 @@
         .order-items li {
             margin-bottom: 5px;
         }
+        .orders-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .order-section {
+            flex: 0 1 500px;
+            margin: 0 10px;
+        }
     </style>
 </head>
 
 <body>
     {% include "_navbar.html" %}
     <br>
-    <div class="container-fluid">
-        <h2>Your Orders</h2>
-        {% if orders %}
-            <div class="orders-list">
-                {% for order in orders %}
-                    <div class="order-item {% if order.status == 'pending' %}pending-orders{% else %}ready-orders{% endif %}">
-                        <div class="order-header">
-                            <h3>{{order.buttery}}</h3>
-                            <p><span class="status-badge {% if order.status == 'pending' %}status-pending{% else %}status-ready{% endif %}">{{order.status|title}}</span></p>
-                        </div>
-                        
-                        <ul class="order-items">
-                            {% for item in order.order_items %}
-                                <li>
-                                    {{item.quantity}}x {{item.name}}
-                                    (${{"{:.2f}".format(item.item_price)}} each)
-                                    {% if item.note %}
-                                        <br><em>Note: {{item.note}}</em>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                        <p><strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong></p>
+    <div class="container">
+        <div class="orders-container">
+            <div class="order-section">
+                <h2>Your Orders</h2>
+                {% if orders %}
+                    <div class="orders-list">
+                        {% for order in orders %}
+                            <div class="order-item {% if order.status == 'pending' %}pending{% else %}ready{% endif %}">
+                                <div class="order-header">
+                                    <h3>{{order.buttery}}</h3>
+                                    <p><span class="status-badge {% if order.status == 'pending' %}status-pending{% else %}status-ready{% endif %}">{{order.status|title}}</span></p>
+                                </div>
+                                
+                                <ul class="order-items">
+                                    {% for item in order.order_items %}
+                                        <li>
+                                            {{item.quantity}}x {{item.name}}
+                                            (${{"{:.2f}".format(item.item_price)}} each)
+                                            {% if item.note %}
+                                                <br><em>Note: {{item.note}}</em>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <p><strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong></p>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                {% else %}
+                    <p>No orders in progress.</p>
+                {% endif %}
             </div>
-        {% else %}
-            <p>No orders in progress.</p>
-        {% endif %}
+        </div>
     </div>
 
     <script>
