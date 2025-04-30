@@ -93,9 +93,9 @@ def u_createAccount():
         db.session.add(new_user)
         db.session.commit()
         
-        response = make_response(redirect("/u_butteries"))
-        # response.set_cookie('user_id', str(new_user.user_id))
-        session['user_id'] = str(new_user.user_id)
+        # Redirect to login page with success message
+        response = make_response(redirect(url_for('u_login')))
+        session['success_msg'] = 'Account created successfully! Please log in.'
         return response
     
     return render_template('u_createAccount.html')
@@ -111,6 +111,12 @@ def u_login():
     error_msg = session.get('error_msg', None)
     if error_msg is None:
         error_msg = ''
+    # Get success message from session
+    success_msg = session.get('success_msg', None)
+    if success_msg is not None:
+        # Clear the success message after displaying it
+        session.pop('success_msg', None)
+
 
     # remember the user
     # username = request.cookies.get('username')
@@ -123,9 +129,11 @@ def u_login():
     if password is None:
         password = ''
 
-    html = render_template('u_login.html', error_msg=error_msg,
-                           username=username,
-                           password=password)
+    html = render_template('u_login.html', 
+                         error_msg=error_msg,
+                         success_msg=success_msg,
+                         username=username,
+                         password=password)
     response = make_response(html)
 
     # response.set_cookie('username', username)  # ! we need this so that if we reload this page we still have username and password
@@ -180,9 +188,13 @@ def u_butteries():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
+    # Get the username from the session
+    username = session.get('u_username', 'User')
+
     butteries = Buttery.query.all()
     return render_template('u_butteries.html', 
-                         butteries=[b.buttery_name for b in butteries])
+                         butteries=[b.buttery_name for b in butteries],
+                         username=username)
 
 #-----------------------------------------------------------------------
 
