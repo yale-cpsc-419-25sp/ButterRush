@@ -8,7 +8,120 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
-    <title>Document</title>
+    <title>Edit Menu Item</title>
+    <style>
+        body {
+            color: #0d2d63;
+            min-height: 100vh;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        .card h3 {
+            color: #0d2d63;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #0d2d63;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        select, datalist {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        button, input[type="submit"] {
+            background-color: #0d2d63;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #0a234a;
+        }
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #0d2d63;
+        }
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .ingredient-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+        .ingredient-list li {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .action-button {
+            margin-left: 10px;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            color: #0d2d63;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .inline-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .inline-form input[type="text"],
+        .inline-form input[list] {
+            flex-grow: 1;
+        }
+    </style>
 </head>
 <body>
     {% include "b_navbar.html" %}
@@ -19,56 +132,62 @@
     </div> -->
     <br>
     
-    <h2>{{item_name}}</h2>
-    <div style="display: flex">
-        <div style="margin: 20px; padding: 20px; border: 1px solid black; padding: 20px">
-            <h3>Edit Ingredient List</h3>
-            {% if message %}
-                <p style="color: red;">{{ message }}</p>
-            {% endif %}
+    <div class="main-content">
+        <div class="container">
+            <h2>{{item_name}}</h2>
+            
+            <div class="cards-container">
+                <div class="card ingredient-card">
+                    <h3>Edit Ingredient List</h3>
+                    {% if message %}
+                        <p class="error-message">{{ message }}</p>
+                    {% endif %}
 
-            <ul>
-                {% for ingredient in item_ingredients %}
-                    <li style="margin-bottom: 10px">
-                        {{ingredient}}
-                        <form style="display: inline-block" method="post">
-                            <input type="hidden" name="action" value="remove_ingredient">
-                            <input type="hidden" name="ingredient" value="{{ingredient}}">
-                            <input type="submit" value="Remove"></label>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
+                    <ul class="ingredient-list">
+                        {% for ingredient in item_ingredients %}
+                            <li>
+                                {{ingredient}}
+                                <form style="display: inline-block" method="post">
+                                    <input type="hidden" name="action" value="remove_ingredient">
+                                    <input type="hidden" name="ingredient" value="{{ingredient}}">
+                                    <input type="submit" value="Remove" class="action-button">
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
 
-            <form method="post">
-                <input type="hidden" name="action" value="add_ingredient"/>
-                <input style="display: inline-block" list="ingredients" name="ingredient"/>
-                <datalist id="ingredients">
-                    {% for ingredient in ingredients %}
-                        <option value="{{ingredient}}"></option>
-                    {% endfor %}
-                </datalist>
-                <input style="display: inline-block" type="submit" name="add_ingredient" value="Add">
-            </form>
-            <br>
-        </div>
+                    <form method="post" class="inline-form">
+                        <input type="hidden" name="action" value="add_ingredient"/>
+                        <input list="ingredients" name="ingredient"/>
+                        <datalist id="ingredients">
+                            {% for ingredient in ingredients %}
+                                <option value="{{ingredient}}"></option>
+                            {% endfor %}
+                        </datalist>
+                        <input type="submit" name="add_ingredient" value="Add">
+                    </form>
+                </div>
 
-        <div style="margin: 20px; padding: 20px; border: 1px solid black">
-            <h3>Buttery Ingredients:</h3>
-            <ul>
-                {% for ingredient in ingredients %}
-                    <li style="margin-bottom: 10px">
-                        {{ingredient}}
-                    </li>
-                {% endfor %}
-            </ul>
-            <form method="post">
-                <input type="hidden" name="action" value="new_ingredient"/>
-                <input type="text" name="ingredient"/>
-                <input type="submit" value="Add New Ingredient"></label>
-            </form>
+                <div class="card ingredient-card">
+                    <h3>Buttery Ingredients</h3>
+                    <ul class="ingredient-list">
+                        {% for ingredient in ingredients %}
+                            <li>
+                                {{ingredient}}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post" class="inline-form">
+                        <input type="hidden" name="action" value="new_ingredient"/>
+                        <input type="text" name="ingredient"/>
+                        <input type="submit" value="Add New Ingredient">
+                    </form>
+                </div>
+            </div>
+            
+            <a href="{{ url_for('b_display_item', item_id=item_id) }}" class="back-link">Go to Item Page</a>
+            <a href="{{ url_for('b_myButtery') }}" class="back-link">Go to Menu</a>
         </div>
     </div>
-    <a href="{{ url_for('b_display_item', item_id=item_id) }}" style="padding-right:20px">Go to Item Page</a>
 </body>
 </html>
