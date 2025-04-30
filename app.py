@@ -629,21 +629,37 @@ def b_display_item(item_id):
         return response
 
     elif request.method == "POST":
-        item_name = request.form.get('item_name')
-        price = request.form.get('price')
-        description = request.form.get('description')
-        category = request.form.get('category')
-        
-        if not menu_item:
-            print("Menu item not found in DB!")
-            return redirect(url_for('b_myButtery'))
-        
-        menu_item.item_name = item_name
-        menu_item.description = description
-        menu_item.price = price
-        menu_item.category = category
-        db.session.commit()
-        return redirect(url_for('b_display_item', item_id=item_id))
+        action = request.form.get('action')
+        if action == "edit_ingredients":
+            return redirect(url_for('b_edit_item_ingredients', item_id=item_id ))
+
+# # FROM OTHER FUNCTION 
+#             elif action == "remove_ingredient":
+
+            
+#             db.session.delete(item_ingredient)
+            
+#             db.session.commit()
+#             return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
+
+
+
+        if action == "edit_item":
+            item_name = request.form.get('item_name')
+            price = request.form.get('price')
+            description = request.form.get('description')
+            category = request.form.get('category')
+            
+            if not menu_item:
+                print("Menu item not found in DB!")
+                return redirect(url_for('b_myButtery'))
+            
+            menu_item.item_name = item_name
+            menu_item.description = description
+            menu_item.price = price
+            menu_item.category = category
+            db.session.commit()
+            return redirect(url_for('b_display_item', item_id=item_id))
 
 #-----------------------------------------------------------------------
 
