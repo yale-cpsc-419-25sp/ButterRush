@@ -12,14 +12,14 @@
     <title>My Buttery</title>
 </head>
 
-<body>
+<body class="alt">
     {% include "b_navbar.html" %}
     <br>
 
-    <h2 style="padding: 10px 20px">{{buttery}}</h2>
+    <h1 style="padding: 5px 20px">{{buttery}}</h1>
     <br>
 
-    <div style="display: flex; padding: 10px 20px;">
+    <div style="display: flex; padding: 1px 20px;">
 
         <div style="width: fit-content; flex: 1; padding: 10px 50px;" class="container"> 
             <!-- it would be nice if we sort of used the same style as the user side buttery menu -->
@@ -38,7 +38,7 @@
             {% endfor %}
             <br> 
             <form action="b_create_item" method="get">
-                <input type="submit" name="create_item" value="Create new menu item">
+                <input type="submit" name="create_item" class="btn buttery-btn" value="Create new menu item">
             </form>
         </div>
     

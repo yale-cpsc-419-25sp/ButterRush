@@ -7,6 +7,11 @@ body {
     background-color: #f8f9fa;
 }
 
+.alt {
+    color: #0d2d63;
+    min-height: 100vh;
+}
+
 p {
     font-family: 'Sen', sans-serif;
 }
@@ -38,9 +43,7 @@ h1 {
     display: inline;
 }
 
-
 /* for ingredients table */
-
 td, th {
     padding-left: 30px;
     padding-right: 30px;
@@ -71,7 +74,6 @@ td:hover {
 }
 
 /* Buttons */
-
 .buttery-btn {
     background-color: #0d2d63;
     border-color: #0d2d63;
@@ -83,3 +85,4 @@ td:hover {
     border-color: #0a234a;
     color: white;
 }
+
