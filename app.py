@@ -3,7 +3,6 @@
 from flask import Flask, request, make_response, redirect, url_for, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
-# import yagmail
 import smtplib
 import asyncio
 from models import db, User, Buttery, MenuItem, Ingredient, Order, OrderItem, MenuItemIngredient, OOSIngredient
@@ -41,9 +40,6 @@ db.init_app(app)
 
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-
-# yagmail.register(MAIL_USERNAME, MAIL_PASSWORD)
-# yag = yagmail.SMTP(MAIL_USERNAME)
 
 #-----------------------------------------------------------------------
 
