@@ -32,7 +32,7 @@
                                 <form action="/u_update_quantity" method="post">
                                     <input type="hidden" name="index" value="{{ loop.index0 }}">
                                     <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()">
-                                    <button type="submit">Update</button>
+                                    <button type="submit" class="btn btn-secondary">Update</button>
                                 </form>
                             </p>
                             <!-- Added price calculation and formatting -->
@@ -44,7 +44,7 @@
                             <!-- Added remove item form -->
                             <form action="/u_remove_from_cart" method="post">
                                 <input type="hidden" name="index" value="{{ loop.index0 }}">
-                                <button type="submit">Remove</button>
+                                <button type="submit" class="btn btn-danger mb-2">Remove</button>
                             </form>
                             <!-- Update total price -->
                             {% set total.value = total.value + (item.menu_item.price * item.quantity|default(1)) %}
@@ -60,7 +60,7 @@
 
                     <!-- Added order submission form with required fields -->
                     <form action="/u_submit_order" method="post">
-                        <button type="submit">Place Order</button>
+                        <button type="submit" class="btn buttery-btn">Place Order</button>
                     </form>
                 {% endif %}
             </div>
