@@ -1,6 +1,7 @@
 from app import app, db
 from models import User, Buttery, MenuItem, Ingredient, MenuItemIngredient
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 def init_db():
     with app.app_context():
@@ -29,7 +30,7 @@ def init_db():
             buttery = Buttery(
                 buttery_name=name, 
                 opening_hours=hours,
-                password_hash=password  # Should use proper password hashing in production
+                password_hash=generate_password_hash(password)  # Should use proper password hashing in production
             )
             db.session.add(buttery)
         

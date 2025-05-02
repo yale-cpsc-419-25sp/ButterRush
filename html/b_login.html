@@ -20,7 +20,15 @@
             </div>
         </div>
         <div class="card-body p-4">
-            <p class="small text-danger">{{error_msg}}</p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="small text-{{category}}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- <p class="small text-danger">{{error_msg}}</p> -->
 
             <form action="b_login_submit" method="get">
                 <!-- Email Component -->

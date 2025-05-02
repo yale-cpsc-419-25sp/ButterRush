@@ -1,6 +1,6 @@
 """ Module for our Flask app """
 
-from flask import Flask, request, make_response, redirect, url_for, render_template, session
+from flask import Flask, request, make_response, redirect, url_for, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 # from flask_mail import Mail, Message
 import smtplib
@@ -10,6 +10,41 @@ from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+# -----------------------------------------------------------------------
+
+app = Flask(__name__, template_folder='.')
+auth = HTTPBasicAuth()
+
+# @auth.verify_password
+# def verify_password(user, password):
+#     if check_password_hash(user.password_hash, password):
+#         return True
+
+# -----------------------------------------------------------------------
+
+
+@app.before_request
+def before_request():
+    if not request.is_secure:
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+
+# -----------------------------------------------------------------------
+
+def get_current_buttery():
+    buttery_id = session.get('buttery_id')
+    if buttery_id is None:
+        return None
+    
+    buttery = Buttery.query.filter_by(buttery_id=buttery_id).first()
+    if not buttery:
+        return None
+    
+    return buttery
 
 # loads email creds from .env file # ! can also put user and buttery credentials in .env and make init_db.py load from that! 
 load_dotenv()
@@ -83,7 +118,7 @@ def u_createAccount():
 
         new_user = User(
             username=username,
-            password_hash=password,  # Should use proper hashing
+            password_hash=generate_password_hash(password),  # Should use proper hashing
             email=email,
         )
         db.session.add(new_user)
@@ -91,7 +126,8 @@ def u_createAccount():
         
         # Redirect to login page with success message
         response = make_response(redirect(url_for('u_login')))
-        session['success_msg'] = 'Account created successfully! Please log in.'
+        # session['success_msg'] = 'Account created successfully! Please log in.'
+        flash("Account created successfully! Please log in.", 'success')
         return response
     
     return render_template('u_createAccount.html')
@@ -102,40 +138,38 @@ def u_createAccount():
 # change this in future
 @app.route('/u_login', methods=['GET'])
 def u_login():
-
     # error_msg = request.cookies.get('error_msg')
-    error_msg = session.get('error_msg', None)
-    if error_msg is None:
-        error_msg = ''
+    # error_msg = session.get('error_msg', None)
+    # if error_msg is None:
+    #     error_msg = ''
     # Get success message from session
-    success_msg = session.get('success_msg', None)
-    if success_msg is not None:
-        # Clear the success message after displaying it
-        session.pop('success_msg', None)
-
+    # success_msg = session.get('success_msg', None)
+    # if success_msg is not None:
+    #     # Clear the success message after displaying it
+    #     session.pop('success_msg', None)
 
     # remember the user
     # username = request.cookies.get('username')
-    username = session.get('username', None)
-    if username is None:
-        username = ''
+    # username = session.get('username', None)
+    # if username is None:
+    #     username = ''
 
-    # password = request.cookies.get('password')
-    password = session.get('password', None)
-    if password is None:
-        password = ''
+    # password = session.get('password', None)
+    # if password is None:
+    #     password = ''
 
+    if 'user_id' in session:
+        return redirect(url_for('u_butteries'))
+
+    username = request.cookies.get('username')  # Cookie for login attempt username
     html = render_template('u_login.html', 
-                         error_msg=error_msg,
-                         success_msg=success_msg,
                          username=username,
-                         password=password)
+                         password="")#password)                         #error_msg=error_msg,
+                         #success_msg=success_msg,
+                         
     response = make_response(html)
-
-    # response.set_cookie('username', username)  # ! we need this so that if we reload this page we still have username and password
-    # response.set_cookie('password', password)
-    session['username'] = username
-    session['password'] = password
+    # session['username'] = username
+    # session['password'] = password
     return response
 
 #-----------------------------------------------------------------------
@@ -147,21 +181,27 @@ def u_login_submit():
 
     if not (username and password):
         response = redirect(url_for('u_login'))
+        response.set_cookie('username', username)
+        flash('Username and password cannot be empty.', 'danger')
         # response.set_cookie('error_msg', 'Username or password empty.')
-        session['error_msg'] = 'Username or password empty.'
+        # session['error_msg'] = 'Username or password empty.'
         return response
 
     user = User.query.filter_by(username=username).first()
-    
+
     if not user:
         response = redirect(url_for('u_login'))
-        session['error_msg'] = 'Username not found.'
+        response.set_cookie('username', username)
+        # session['error_msg'] = 'Username not found.'
+        flash('Username not found.', 'danger')
         # response.set_cookie('error_msg', 'Username not found.')
         return response
 
-    if user.password_hash != password:  # Should use proper password verification
+    if not check_password_hash(user.password_hash, password):  # Should use proper password verification
         response = redirect(url_for('u_login'))
-        session['error_msg'] = 'Incorrect password.'
+        response.set_cookie('username', username)
+        flash("Incorrect password", 'danger')
+        # session['error_msg'] = 'Incorrect password.'
         # response.set_cookie('error_msg', 'Incorrect password.')
         return response
 
@@ -477,30 +517,33 @@ def u_account():
 def b_login():
 
     # error_msg = request.cookies.get('error_msg')
-    error_msg = session.get('error_msg', None)
-    if error_msg is None:
-        error_msg = ''
+    # error_msg = session.get('error_msg', None)
+    # if error_msg is None:
+    #     error_msg = ''
 
     # remember the user
-    # username = request.cookies.get('username')
-    username = session.get('username', None)
-    if username is None:
-        username = ''
+    if session.get('buttery_id') is not None:
+        return redirect(url_for('b_myButtery'))
+    
+    username = request.cookies.get('buttery')
+    # username = session.get('username', None)
+    # if username is None:
+    #     username = ''
 
     # password = request.cookies.get('password')
-    password = session.get('password', None)
-    if password is None:
-        password = ''
+    # password = session.get('password', None)
+    # if password is None:
+    #     password = ''
 
-    html = render_template('b_login.html', error_msg=error_msg,
-                           username=username,
-                           password=password)
+    html = render_template('b_login.html',# error_msg=error_msg,
+                           username=username)#,
+                           #password=password)
     response = make_response(html)
 
     # response.set_cookie('username', username)
     # response.set_cookie('password', password)
-    session['username'] = username
-    session['password'] = password
+    # session['username'] = username
+    # session['password'] = password
     return response
 
 #-----------------------------------------------------------------------
@@ -512,12 +555,12 @@ def b_login_submit():
 
     username = username if username else ""
     password = password if password else ""
-
+    
     if (username.strip() == '' or password.strip() == ''):
         response = redirect(url_for('b_login'))
-        error_msg = 'Username or password empty.'
+        flash('Username or password empty.', 'danger')
         # response.set_cookie('error_msg', error_msg)
-        session['error_msg'] = error_msg
+        # session['error_msg'] = error_msg
 
     else:
         # Query the Buttery from database instead of using BUTTERY_PASSWORD_DB
@@ -526,27 +569,29 @@ def b_login_submit():
         if not buttery:
             response = redirect(url_for('b_login'))
             error_msg = 'Username not found. Create an account.'
+            flash(error_msg, 'danger')
             # response.set_cookie('error_msg', error_msg)
-            session['error_msg'] = error_msg
+            # session['error_msg'] = error_msg
 
         # TODO: Add proper password handling here
-        elif password != 'temp_password':  # Temporary solution - should use proper password handling
+        elif not check_password_hash(buttery.password_hash, password):
             response = redirect(url_for('b_login'))
             error_msg = 'Password incorrect.'
+            flash(error_msg, 'danger')
             # response.set_cookie('error_msg', error_msg)
-            session['error_msg'] = error_msg
+            # session['error_msg'] = error_msg
 
         else:
-            html = redirect(url_for('b_myButtery'))
-            response = make_response(html)
+            session['buttery_id'] = buttery.buttery_id
+            return redirect(url_for('b_myButtery'))
             # response.set_cookie('error_msg', '')
-            error_msg = ''
-            session['error_msg'] = error_msg
+            # error_msg = ''
+            # session['error_msg'] = error_msg
 
-    # response.set_cookie('username', username) 
+    response.set_cookie('buttery', username) 
     # response.set_cookie('password', password)
-    session['username'] = username
-    session['password'] = password
+    # session['username'] = username
+    # session['password'] = password
 
     return response
 
@@ -554,16 +599,7 @@ def b_login_submit():
 
 @app.route('/b_myButtery', methods=['GET'])  
 def b_myButtery():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
-        return redirect(url_for('b_login'))
-    
-    # Get the buttery name from cookie
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    
-    # Get the buttery and its menu items from database
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
@@ -578,7 +614,7 @@ def b_myButtery():
     ingredients = [ingredient for ingredient in Ingredient.query.all()]
     
     html = render_template('b_myButtery.html', 
-                         buttery=buttery_name,
+                         buttery=buttery.buttery_name,
                          menuItems=menu_items,
                          itemIDs=[item.menu_item_id for item in menu_items],
                          ingredients=ingredients,
@@ -591,19 +627,15 @@ def b_myButtery():
 
 @app.route('/b_display_item/<string:item_id>', methods=['GET', 'POST'])
 def b_display_item(item_id):
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
+    buttery = get_current_buttery()
+    if not buttery:
         return redirect(url_for('b_login'))
     
     try:
         item_id = int(item_id)
     except ValueError:
         return redirect(url_for('b_myButtery'))
-    
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+
     menu_item = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
         menu_item_id=item_id).first()
@@ -615,7 +647,7 @@ def b_display_item(item_id):
     if request.method == "GET":
         html = render_template('b_menuItem.html',
                         ingredients=[ing.ingredient_name for ing in menu_item.ingredients],
-                        buttery=buttery_name,
+                        buttery=buttery.buttery_name,
                         menuItem=menu_item.item_name,
                         price=menu_item.price,
                         description=menu_item.description,
@@ -657,8 +689,8 @@ def b_display_item(item_id):
 
 @app.route('/b_edit_item_ingredients/<string:item_id>', methods=['GET', 'POST'])
 def b_edit_item_ingredients(item_id):
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
+    buttery = get_current_buttery()
+    if not buttery:
         return redirect(url_for('b_login'))
     
     try:
@@ -667,7 +699,10 @@ def b_edit_item_ingredients(item_id):
         print("ID can't be converted to int")
         return redirect(url_for('b_myButtery'))
     
-    item = MenuItem.query.filter_by(menu_item_id=item_id).first()
+    item = MenuItem.query.filter_by(
+        buttery_id=buttery.buttery_id,
+        menu_item_id=item_id).first()
+    
     if not item:
         print("Menu item not found in DB!")
         return redirect(url_for('b_myButtery'))
@@ -675,11 +710,7 @@ def b_edit_item_ingredients(item_id):
     item_ingredients = [ing.ingredient_name for ing in item.ingredients]
     
     ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
-    
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    
+        
     if request.method == 'GET':
         return render_template('b_edit_item_ingredients.html',
                                item_id=item_id,
@@ -748,16 +779,14 @@ def b_edit_item_ingredients(item_id):
 
 @app.route('/b_delete_item', methods=['POST'])
 def b_delete_item():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
+    buttery = get_current_buttery()
+    if not buttery:
         return redirect(url_for('b_login'))
     
     menu_item_name = request.form.get('menu_item')
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
     
     # Get menu item from database
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    buttery = Buttery.query.filter_by(buttery_name=buttery.buttery_name).first()
     menu_item = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
         item_name=menu_item_name).first()
@@ -777,8 +806,8 @@ def b_delete_item():
 
 @app.route('/b_create_item', methods=['GET', 'POST'])
 def b_create_item():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
+    buttery = get_cirrent_buttery()
+    if not buttery:
         return redirect(url_for('b_login'))
     
     # item_ingredients = request.cookies.get('item_ingredients')
@@ -791,15 +820,9 @@ def b_create_item():
         
     ingredients = [ingredient.ingredient_name for ingredient in Ingredient.query.all()]
     
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    if not buttery:
-        return redirect(url_for('b_login'))
-    
     if request.method == 'GET': 
         return render_template('b_create_item.html', 
-                             buttery=buttery_name,
+                             buttery=buttery.buttery_name,
                              ingredients=ingredients, # ! note that this is not used anywhere
                              item_ingredients=item_ingredients)
         
@@ -822,7 +845,7 @@ def b_create_item():
             
             if message: # Some ingredients were not found in the ingredients database
                 return render_template('b_create_item.html', 
-                                buttery=buttery_name,
+                                buttery=buttery.buttery_name,
                                 ingredients=ingredients,
                                 item_ingredients=item_ingredients,
                                 message=message) # Change this, allow adding ingredients
@@ -845,14 +868,7 @@ def b_create_item():
 
 @app.route('/b_orderQueue', methods=['GET']) 
 def b_orderQueue():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
-        return redirect(url_for('b_login'))
-    
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
@@ -919,8 +935,8 @@ async def send_email(email, message):
 
 @app.route('/b_update_order_status', methods=['POST'])
 def b_update_order_status():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
+    buttery = get_current_buttery()
+    if not buttery:
         return redirect(url_for('b_login'))
     
     order_id = request.form.get('order_id')
@@ -932,9 +948,7 @@ def b_update_order_status():
         # send email to user
         if new_status == "ready":
             user = User.query.get(order.user_id)
-            buttery = Buttery.query.get(order.buttery_id)
-
-            if user and buttery:
+            if user:
                 asyncio.run(send_email(user.email, buttery.buttery_name)) 
 
         order.status = new_status
@@ -947,19 +961,12 @@ def b_update_order_status():
 
 @app.route('/b_account', methods=['GET']) 
 def b_account():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
-        return redirect(url_for('b_login'))
-    
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
     html = render_template('b_account.html', 
-                         username=buttery_name,
+                         username=buttery.buttery_name,
                          buttery=buttery)  # Pass the buttery object to template
     response = make_response(html)
     
@@ -967,14 +974,7 @@ def b_account():
 
 @app.route('/b_update_hours', methods=['POST'])
 def b_update_hours():
-    # TODO: Should we check for 'username' or sth else?
-    if session.get('username') is None:
-        return redirect(url_for('b_login'))
-    
-    # buttery_name = request.cookies.get('username')
-    buttery_name = session.get('username')
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
@@ -989,11 +989,9 @@ def b_update_hours():
 
 @app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
 def logout():
-    # clear cookies
+    # clear session
     html = redirect(url_for("home"))
     response = make_response(html)
-    # response.set_cookie('username', '')
-    # response.set_cookie('password', '')
     session.clear()
     
     return response
@@ -1042,10 +1040,17 @@ def b_update_item_check():
 # toggles when item is OOS
 @app.route('/b_toggleIngredientOOS', methods=['POST'])
 def b_toggleIngredientOOS():
+    buttery = get_current_buttery()
+    if not buttery:
+        return redirect(url_for('b_login'))
+    
     data = request.get_json()
     
     ingredient_id = data.get('ingredient_id')
     buttery_id = data.get('buttery_id')
+    if buttery_id != buttery.buttery_id:
+        return redirect(url_for('home'))
+    
     set_unavailable = data.get('set_unavailable')
 
     oos = OOSIngredient.query.filter_by(ingredient_id=ingredient_id, buttery_id=buttery_id).first()
