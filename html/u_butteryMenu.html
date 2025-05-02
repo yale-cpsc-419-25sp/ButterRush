@@ -34,26 +34,28 @@
             <!-- Group menu items by category -->
             {% for category, items in menuItems|groupby('category') %}
                 <h2>{{ category }}</h2>
-                <div class="menu-category">
-                    {% for item in items %}
-                        <!-- Only show available items -->
-                        {% if item.is_available %}
-                            <div class="menu-item">
-                                <h3>{{ item.item_name }}</h3>
-                                <!-- Added description display -->
-                                {% if item.description %}
-                                    <p>{{ item.description }}</p>
+                <div class="menu-category container">
+                    {% for i in range(0, items|length, 3) %}
+                        <div class="row row-cols-3">
+                            {% for j in range(3) %}
+                                {% if i+j < items|length %}
+                                <div class="col">
+                                    <div class="menu-item" style="padding: 20px 20px; border-style: solid; border-width: 2px; border-color: black;">
+                                        <h3>{{ items[i+j].item_name }}</h3>
+                                        {% if items[i+j].description %}
+                                            <p>{{ items[i+j].description }}</p>
+                                        {% endif %}
+                                        <p>Price: ${{ "%.2f"|format(items[i+j].price) }}</p>
+                                        <form action="u_display_item" method="get">
+                                            <input type="hidden" name="menu_item" value="{{ items[i+j].item_name }}">
+                                            <input type="hidden" name="buttery" value="{{ buttery }}">
+                                            <button type="submit">View Details</button>
+                                        </form>
+                                    </div>
+                                </div>
                                 {% endif %}
-                                <!-- Added price formatting -->
-                                <p>Price: ${{ "%.2f"|format(item.price) }}</p>
-                                <form action="u_display_item" method="get">
-                                    <!-- Changed to use item ID instead of name -->
-                                    <input type="hidden" name="menu_item" value="{{ item.item_name }}">
-                                    <input type="hidden" name="buttery" value="{{ buttery }}">
-                                    <button type="submit">View Details</button>
-                                </form>
-                            </div>
-                        {% endif %}
+                            {% endfor %}
+                        </div>
                     {% endfor %}
                 </div>
             {% endfor %}

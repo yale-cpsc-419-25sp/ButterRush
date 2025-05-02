@@ -205,7 +205,8 @@ def u_get_buttery_menu():
     
     # Remove is_available filter for now
     menu_items = MenuItem.query.filter_by(
-        buttery_id=buttery.buttery_id
+        buttery_id=buttery.buttery_id,
+        is_available=True
     ).all()
     
     return render_template('u_butteryMenu.html',
