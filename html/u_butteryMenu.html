@@ -35,8 +35,10 @@
             {% for category, items in menuItems|groupby('category') %}
                 <h2>{{ category }}</h2>
                 <div class="menu-category container">
+                    
                     {% for i in range(0, items|length, 3) %}
                         <div class="row row-cols-3">
+                            
                             {% for j in range(3) %}
                                 {% if i+j < items|length %}
                                 <div class="col">
