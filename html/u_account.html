@@ -11,10 +11,6 @@
     <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
     <title>Buttery Account</title>
     <style>
-        body {
-            color: #0d2d63;
-            min-height: 100vh;
-        }
         .main-content {
             display: flex;
             flex-direction: column;
@@ -102,7 +98,7 @@
     </style>
 </head>
 
-<body>
+<body class="alt">
     {% include "_navbar.html" %}
 
     <br>
