@@ -9,17 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
     <style>
-        .buttery-btn {
-            background-color: #0d2d63;
-            border-color: #0d2d63;
-            color: white;
-        }
-        
-        .buttery-btn:hover {
-            background-color: #0a234a;
-            border-color: #0a234a;
-            color: white;
-        }
         .welcome-message {
             color: #0d2d63;
             margin-bottom: 20px;
@@ -45,19 +34,24 @@
 
     <!-- list of butteries -->
     <div class="container">
-
         <!-- list of butteries -->
-        {% for i in range(0, butteries|length, 3) %}
-        <div class="row row-cols-3">
-            {% for j in range(3) %}
-            {% if i+j < butteries|length %}
-            <form action="u_get_buttery_menu" method="get">
-                <button class="btn buttery-btn m-1" type="submit" name="buttery" value="{{butteries[i+j]}}">{{butteries[i+j]}}</button>
-            </form>
-            {% endif %}
+        <div class="row row-cols-2 row-cols-md-6 g-3 text-center mb-5">
+          {% for name in butteries %}
+            <div class="col">
+            <!-- display buttery college crest -->
+                <img
+                    src="{{ url_for('static', filename='crests/' ~ name ~ '.png') }}"
+                    alt="{{ name }}"
+                    class="img-fluid mb-2"
+                    style="max-height: 100px; width: auto">
+                <!-- display button -->
+                    <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
+                        <button class="btn buttery-btn" type="submit" name="buttery" value="{{ name }}">{{ name }}
+                        </button>
+                    </form>
+            </div>
             {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </body>
 
