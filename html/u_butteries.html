@@ -28,12 +28,6 @@
 </head>
 
 <body>
-    <!-- <div class="header">
-        <a href="/u_butteries">Butteries</a>
-        <a href="/u_ordersIP">Orders in Progress</a>
-        <a href="/u_cart">Cart</a>
-        <a href="/u_account">Account</a>
-    </div> -->
     {% include "_navbar.html" %}
     <br>
 
@@ -51,6 +45,7 @@
         <div class="row row-cols-3">
             {% for j in range(3) %}
             {% if i+j < butteries|length %}
+            <!-- we could change this styling so it's not just a standalone button -->
             <form action="u_get_buttery_menu" method="get">
                 <button class="btn buttery-btn m-1" type="submit" name="buttery" value="{{butteries[i+j]}}">{{butteries[i+j]}}</button>
             </form>
