@@ -450,9 +450,9 @@ def b_login():
     if session.get('buttery_id') is not None:
         return redirect(url_for('b_myButtery'))
     
-    username = request.cookies.get('buttery')
+    # username = request.cookies.get('buttery')
 
-    html = render_template('b_login.html', username=username)
+    html = render_template('b_login.html', username="")
     response = make_response(html)
 
     return response
