@@ -4,5 +4,4 @@ flask_sqlalchemy
 yagmail
 keyring
 dotenv
-smptlib
 flask_httpauth

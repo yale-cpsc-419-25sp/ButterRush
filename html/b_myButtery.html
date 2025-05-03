@@ -86,6 +86,8 @@
         function ingredOutOfStock(ingredientId, butteryId) {
             let element = document.getElementById(ingredientId);
             element.classList.toggle("outOfStock");
+
+            console.log("hello??")
             
             // change backend db
             let url = "/b_toggleIngredientOOS"

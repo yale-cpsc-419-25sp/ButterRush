@@ -1047,13 +1047,13 @@ def b_toggleIngredientOOS():
     
     ingredient_id = data.get('ingredient_id')
     buttery_id = data.get('buttery_id')
-    if buttery_id != buttery.buttery_id:
+    if int(buttery_id) != int(buttery.buttery_id):
         return redirect(url_for('home'))
     
     set_unavailable = data.get('set_unavailable')
 
     oos = OOSIngredient.query.filter_by(ingredient_id=ingredient_id, buttery_id=buttery_id).first()
-    # print(oos, set_unavailable)
+    # print("hi: ", oos, set_unavailable)
 
     if oos is not None and not set_unavailable: # need this check for oos so we don't delete something that doesn't exist
         # print("DELETING FROM OOS")
@@ -1072,6 +1072,7 @@ def b_toggleIngredientOOS():
                 if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
                     available = False
                     break
+            
             menu_item.is_available = available
 
         db.session.commit()
