@@ -18,9 +18,10 @@
     
     <div class="container-fluid">
         <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
-            <button class="btn buttery-btn" type="submit" name="buttery" value="{{ buttery }}">{{ name }}
+            <button class="btn btn-secondary" type="submit" name="buttery" value="{{ buttery }}">Back to {{ buttery }} menu
             </button>
         </form>
+        <br>
 
         <h2>Your Cart</h2>
         <!-- Cart content with empty state handling -->
@@ -48,8 +49,9 @@
                                 <p>Note: {{ item.note }}</p>
                             {% endif %}
                             <!-- Added remove item form -->
-                            <form action="/u_remove_from_cart" method="post">
+                            <form action="/u_remove_from_cart_from_buttery" method="post">
                                 <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                <input type="hidden" name="buttery_name" value="{{ buttery }}">
                                 <button type="submit" class="btn btn-danger mb-2">Remove</button>
                             </form>
                             <!-- Update total price -->

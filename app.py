@@ -318,7 +318,8 @@ def u_add_to_cart():
 
         # Create response with updated cart
         html = render_template('u_cart_from_buttery.html',
-                               buttery=buttery)
+                               buttery=buttery,
+                               cart=cart)
         response = make_response(html)
         session['cart'] = cart
         return response
@@ -360,8 +361,6 @@ def u_remove_from_cart():
     
     index = int(request.form.get('index'))
 
-    # cart_cookie = request.cookies.get('cart')
-    # cart = json.loads(cart_cookie) if cart_cookie else []
     cart = session.get('cart', [])
 
     # remove item if index is valid
@@ -369,7 +368,27 @@ def u_remove_from_cart():
         cart.pop(index)
 
     response = make_response(redirect(url_for('u_cart')))
-    # response.set_cookie('cart', json.dumps(cart))
+    session['cart'] = cart
+    return response
+
+#-----------------------------------------------------------------------
+
+@app.route('/u_remove_from_cart_from_buttery', methods=['POST'])
+def u_remove_from_cart_from_buttery():
+    if 'user_id' not in session:
+        return redirect(url_for('u_login'))
+    
+    index = int(request.form.get('index'))
+    buttery = request.form.get('buttery_name')
+
+    cart = session.get('cart', [])
+
+    # remove item if index is valid
+    if 0 <= index < len(cart):
+        cart.pop(index)
+
+    html = render_template('u_cart_from_buttery.html', buttery=buttery, cart=cart)
+    response = make_response(html)
     session['cart'] = cart
     return response
 
@@ -380,10 +399,6 @@ def u_submit_order():
     # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
-    
-    # cart_cookie = request.cookies.get('cart')
-    # cart = json.loads(cart_cookie) if cart_cookie else []
-    # user_id = int(request.cookies.get('user_id'))
 
     cart = session.get('cart', [])
     user_id = int(session.get('user_id'))
@@ -968,8 +983,6 @@ def u_update_quantity():
     index = int(request.form.get('index'))
     new_quantity = int(request.form.get('quantity'))
     
-    # cart_cookie = request.cookies.get('cart')
-    # cart = json.loads(cart_cookie) if cart_cookie else []
     cart = session.get('cart', [])
     
     # Update quantity if index is valid
@@ -977,7 +990,6 @@ def u_update_quantity():
         cart[index]['quantity'] = new_quantity
     
     response = make_response(redirect(url_for('u_cart')))
-    # response.set_cookie('cart', json.dumps(cart))
     session['cart'] = cart
     return response
 
