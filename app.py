@@ -19,11 +19,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__, template_folder='.')
 auth = HTTPBasicAuth()
 
-# @auth.verify_password
-# def verify_password(user, password):
-#     if check_password_hash(user.password_hash, password):
-#         return True
-
 # -----------------------------------------------------------------------
 
 
@@ -1024,7 +1019,6 @@ def b_update_item_check():
     item_id = data.get('item_id')
     checked = data.get('checked')
 
-    
     order_item = OrderItem.query.filter_by(
         order_id=order_id,
         order_item_id=item_id
