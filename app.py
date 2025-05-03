@@ -791,15 +791,14 @@ def b_orderQueue():
 # Link: https://docs.python.org/3/library/smtplib.html#smtplib.SMTP.sendmail
 # Additionally, further credit is given to "How to send text messages with Python for Free" by David Mentgen/
 # Link: https://medium.com/testingonprod/how-to-send-text-messages-with-python-for-free-a7c92816e1a4
-async def send_email(email, message):
+async def send_email(email, message, subject):
     def send():
         recipient = email
-    
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(MAIL_USERNAME, MAIL_PASSWORD)
-    
-        server.sendmail(MAIL_USERNAME, recipient, message)
+        msg_subj_formatted = 'Subject: {}\n\n{}'.format(subject, message)
+        server.sendmail(MAIL_USERNAME, recipient, msg_subj_formatted)
     
     asyncio.to_thread(send())
 
@@ -820,7 +819,8 @@ def b_update_order_status():
         if new_status == "ready":
             user = User.query.get(order.user_id)
             if user:
-                asyncio.run(send_email(user.email, buttery.buttery_name)) 
+                message = f"Your order from {buttery.buttery_name} is ready. Please come pick it up :)"
+                asyncio.run(send_email(user.email, buttery.buttery_name, 'Your ButterRush Order is Ready!')) 
 
         order.status = new_status
         # Don't reset the checked status of items when updating order status
