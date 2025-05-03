@@ -820,7 +820,7 @@ def b_update_order_status():
             user = User.query.get(order.user_id)
             if user:
                 message = f"Your order from {buttery.buttery_name} is ready. Please come pick it up :)"
-                asyncio.run(send_email(user.email, buttery.buttery_name, 'Your ButterRush Order is Ready!')) 
+                asyncio.run(send_email(user.email, message, 'Your ButterRush Order is Ready!')) 
 
         order.status = new_status
         # Don't reset the checked status of items when updating order status
