@@ -35,9 +35,9 @@ class Ingredient(db.Model):
     __tablename__ = 'ingredients'
     
     ingredient_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ingredient_name = db.Column(db.String, nullable=False, unique=True)
+    ingredient_name = db.Column(db.String, nullable=False) #, unique=True)
     inventory_quantity = db.Column(db.Float, default=0)
-
+    
 # Replaces BUTTERY_MENU_DB and MENU_ITEM_DB dictionaries
 # Added fields: description, price, category, is_available
 class MenuItem(db.Model):
@@ -93,7 +93,6 @@ class OrderItem(db.Model):
     item_price = db.Column(db.Numeric(10,2), nullable=False)
     checked = db.Column(db.Boolean, default=False)  # For buttery to track completion 
 
-# ! using a DB for this right now, so it will persist and stuff
 # junction table for many-to-many relationship, contains the ingredients in each buttery that are OOS (out of stock)
 class OOSIngredient(db.Model):
     __tablename__ = "oos_ingredients"

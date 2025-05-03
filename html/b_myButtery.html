@@ -54,10 +54,17 @@
                         <th>Ingredients</th>
                     </tr>
                 </thead>
-                {% for ingredient in ingredients %}
+                {% for ing, avail in ingredients %}
                 <tbody>
                     <tr>
-                        <td id="{{ingredient.ingredient_id}}" onclick="ingredOutOfStock('{{ingredient.ingredient_id}}', '{{buttery_id}}')">{{ingredient.ingredient_name}}</td>
+                        
+                        <!-- on page reload -->
+                        {% if avail %}
+                        <td id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                        {% else %}
+                        <td class="outOfStock" id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                        {% endif %}
+
                     </tr>
                 </tbody>
                 {% endfor %}
@@ -79,9 +86,7 @@
         function ingredOutOfStock(ingredientId, butteryId) {
             let element = document.getElementById(ingredientId);
             element.classList.toggle("outOfStock");
-
-            // console.log(ingredientId);
-
+            
             // change backend db
             let url = "/b_toggleIngredientOOS"
 
@@ -92,6 +97,12 @@
                contentType: 'application/json'
             });
         }
+
+        // function setup() {
+
+        // }
+        
+        // $('document').ready(setup);
     </script>
 </body>
 
