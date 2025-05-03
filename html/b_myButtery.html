@@ -1,57 +1,39 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='ButterRushLogo.png') }}" type="image/png" />
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
-    <title>My Buttery</title>
-</head>
-
-<body class="alt">
+{% extends "global_template.html" %}
+{% block title %}My Buttery{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}alt{% endblock %}
+{% block body %}  
     {% include "b_navbar.html" %}
-    <br>
 
     <h1 style="padding: 5px 20px">{{buttery}}</h1>
     <br>
 
     <div style="display: flex; padding: 1px 20px;">
-
-            <div style="width: fit-content; flex: 1; padding: 10px 50px;" class="container"> 
-                <!-- it would be nice if we sort of used the same style as the user side buttery menu -->
-
-                {% for i in range(0, menuItems|length, 3) %} 
+        <div style="width: fit-content; flex: 1; padding: 10px 50px;" class="container"> 
+            {% for i in range(0, menuItems|length, 3) %} 
                 <div class="row row-cols-3">
                     {% for j in range(3) %}
-                    {% if i+j < menuItems|length %}
-                    <div class="col" style="padding: 10px 5px 10px 5px; ">   <!-- style="border-style: solid; border-width: 2px; border-color: lightgray;" -->
-                        <div style="padding: 5px; border-radius: 5px; box-shadow: 0px 0px 6px gray;">
-                            <a href="{{ url_for('b_display_item', item_id=itemIDs[i+j]) }}" style="padding-right:20px">{{menuItems[i+j].item_name}}</a>
-                            <br>
-                            <br>
-                        </div>
-                    </div>
-                    {% endif %}
+                        {% if i+j < menuItems|length %}
+                            <div class="col" style="padding: 10px 5px 10px 5px; ">   <!-- style="border-style: solid; border-width: 2px; border-color: lightgray;" -->
+                                <div style="padding: 5px; border-radius: 5px; box-shadow: 0px 0px 6px gray;">
+                                    <a href="{{ url_for('b_display_item', item_id=itemIDs[i+j]) }}" style="padding-right:20px">{{menuItems[i+j].item_name}}</a>
+                                    <br/>
+                                    <br/>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
-                {% endfor %}
-                <br> 
-                <form action="{{ url_for('b_create_item') }}" method="get">
-                    <input type="submit" name="create_item" class="btn buttery-btn" value="Create new menu item">
-                </form>
-            </div>
+            {% endfor %}
+            <br/> 
+            <form action="{{ url_for('b_create_item') }}" method="get">
+                <input type="submit" name="create_item" class="btn buttery-btn" value="Create new menu item">
+            </form>
+        </div>
 
-    
         <!-- ingredient list that the buttery can mark as out of stock -->
-         <div class="ingredientList" style="width: 30%; float: right; ">
-            Mark ingredients below as out of stock/not in use.
-            
-            <br><br>
+        <div class="ingredientList" style="width: 30%; float: right; ">
+            <p>Mark ingredients below as out of stock/not in use.</p>
 
             <table style="text-align: center; margin: auto;">
                 <thead>
@@ -61,22 +43,22 @@
                 </thead>
 
                 <tbody>
-                {% for ing, avail in ingredients %}
-                    <tr>
-                        
-                        <!-- on page reload -->
-                        {% if avail %}
-                            <td id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
-                        {% else %}
-                            <td class="outOfStock" id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
-                        {% endif %}
+                    {% for ing, avail in ingredients %}
+                        <tr>
+                            
+                            <!-- on page reload -->
+                            {% if avail %}
+                                <td id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                            {% else %}
+                                <td class="outOfStock" id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                            {% endif %}
 
-                    </tr>
-                {% endfor %}
-            </tbody>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-         </div>
-
+            </div>
+        </div>
     </div>
 
     <!-- maybe standardize how we are calling ajax -->
@@ -92,26 +74,15 @@
         function ingredOutOfStock(ingredientId, butteryId) {
             let element = document.getElementById(ingredientId);
             element.classList.toggle("outOfStock");
-
-            // console.log("hello??")
             
-            // change backend db
-            let url = "/buttery/toggleoutofstock"
+            let url = "{{ url_for('b_toggleIngredientOOS') }}"
 
             request = $.ajax({
-               type: 'POST',
-               url: url,
-               data: JSON.stringify({ingredient_id: ingredientId, buttery_id: butteryId, set_unavailable: element.classList.contains("outOfStock")}), // ! this could be incredibly not optimal! 
-               contentType: 'application/json'
+            type: 'POST',
+            url: url,
+            data: JSON.stringify({ingredient_id: ingredientId, buttery_id: butteryId, set_unavailable: element.classList.contains("outOfStock")}), // ! this could be incredibly not optimal! 
+            contentType: 'application/json'
             });
         }
-
-        // function setup() {
-
-        // }
-        
-        // $('document').ready(setup);
     </script>
-</body>
-
-</html>
+{% endblock %}

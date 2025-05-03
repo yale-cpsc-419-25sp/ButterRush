@@ -1,22 +1,31 @@
 <nav class="navbar navbar-expand-lg" style="background-color:#f6d971">
     <div class="container-fluid">
-        <img src="{{ url_for('static', filename='ButterRushLogo.png') }}" alt="ButterRush Logo" style="max-height: 45px; width: auto">
-        <p class="navbar-brand m-1" style="color:#00356b; font-family: 'Poetsen One', sans-serif;">ButterRush</p>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-center" id="navbarTogglerDemo01">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('b_myButtery') }}" style="color:#00356b">My Buttery</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('b_orderQueue') }}" style="color:#00356b">Orders</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('b_account') }}" style="color:#00356b">Account</a>
-                </li>
-            </ul>
+        <div class="col">
+            <img class="d-inline" src="{{ url_for('static', filename='ButterRushLogo.png') }}" alt="ButterRush Logo" style="max-height: 45px; width: auto">
+            <p class="navbar-brand m-1 d-inline align-middle" style="color:#00356b; font-family: 'Poetsen One', sans-serif;">ButterRush</p>
+        </div>
+
+        <div class="col">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarToggler">
+                <ul class="navbar-nav align-self-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-center" href="{{ url_for('b_myButtery') }}" style="color:#00356b">My Buttery</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-center" href="{{ url_for('b_orderQueue') }}" style="color:#00356b">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-center" href="{{ url_for('b_account') }}" style="color:#00356b">Account</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col">
+            <button class="navbar-toggler float-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
     </div>
 </nav>
+<br/>
