@@ -763,8 +763,9 @@ def b_orderQueue():
                 'note': item.note,
                 'checked': item.checked  # Include checked status
             })
-        
-        user = User.query.get(order.user_id)
+        print(order.user_id)
+        user = User.query.filter_by(user_id=order.user_id).first()
+        # user = User.query.get(order.user_id)
         username = user.username if user else 'Unknown User'
         
         # Only include pending and ready orders in the queue
@@ -897,6 +898,7 @@ def b_toggleIngredientOOS():
     # print("hi: ", oos, set_unavailable)
 
     if oos is not None and not set_unavailable: # need this check for oos so we don't delete something that doesn't exist
+        # print("REMOVING FROM OOS")
         db.session.delete(oos)
         db.session.commit()
 
@@ -906,7 +908,8 @@ def b_toggleIngredientOOS():
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            if menu_item.buttery_id == buttery_id:
+            # print('HELLO')
+            if int(menu_item.buttery_id) == int(buttery_id):
                 available = True
                 for ingredient in menu_item.ingredients: # only make reappear if rest of ingredients also in stock
                     if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
@@ -929,7 +932,7 @@ def b_toggleIngredientOOS():
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            if menu_item.buttery_id == buttery_id:
+            if int(menu_item.buttery_id) == int(buttery_id):
                 menu_item.is_available = False
 
         db.session.commit()
