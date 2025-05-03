@@ -231,12 +231,15 @@ def u_butteries():
 
 @app.route('/u_get_buttery_menu', methods=['GET'])
 def u_get_buttery_menu():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
     buttery_name = request.args.get('buttery')
+    if not buttery_name:
+        return "Request missing a buttery", 400
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
+    if not buttery:
+        return "Buttery not found", 400
     
     menu_items = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
@@ -256,18 +259,26 @@ def u_display_item():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
+    # Verify that request contains a valid buttery
     buttery = request.args.get('buttery')
-    menu_item_name = request.args.get('menu_item')
+    if not buttery:
+        return "Request missing a buttery", 400
     
-    # Get menu item from database
     buttery_obj = Buttery.query.filter_by(buttery_name=buttery).first()
+    if not buttery_obj:
+        return "Buttery not found", 400
+    
+    # Verify that request contains a valid menu item from given buttery and get item
+    menu_item_name = request.args.get('menu_item')
+    if not menu_item_name:
+        return "Request missing a menu item", 400
+    
     menu_item = MenuItem.query.filter_by(
         buttery_id=buttery_obj.buttery_id,
         item_name=menu_item_name
     ).first()
-    
     if not menu_item:
-        return "Menu item not found", 404
+        return "Menu item not found", 400
     
     return render_template('u_menuItem.html',
                          menu_item=menu_item,  # Pass the entire menu_item object
@@ -277,61 +288,50 @@ def u_display_item():
 
 @app.route('/u_add_to_cart', methods=['POST'])
 def u_add_to_cart():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
-    try:
-        menu_item = request.form.get('menu_item')
-        buttery = request.form.get('buttery')
-        quantity = int(request.form.get('quantity', 1))
-        note = request.form.get('note', '')
+    menu_item = request.form.get('menu_item')
+    buttery = request.form.get('buttery')
+    quantity = int(request.form.get('quantity', 1))
+    note = request.form.get('note', '')
 
-        # Get the menu item from database
-        buttery_obj = Buttery.query.filter_by(buttery_name=buttery).first()
-        if not buttery_obj:
-            return "Buttery not found", 404
+    # Get the menu item from database
+    buttery_obj = Buttery.query.filter_by(buttery_name=buttery).first()
+    if not buttery_obj:
+        return "Buttery not found", 404
 
-        menu_item_obj = MenuItem.query.filter_by(
-            buttery_id=buttery_obj.buttery_id,
-            item_name=menu_item
-        ).first()
+    menu_item_obj = MenuItem.query.filter_by(
+        buttery_id=buttery_obj.buttery_id,
+        item_name=menu_item
+    ).first()
 
-        if not menu_item_obj:
-            return "Menu item not found", 404
+    if not menu_item_obj:
+        return "Menu item not found", 404
 
-        # Get current cart or initialize empty cart
-        # cart_cookie = request.cookies.get('cart')
-        # cart = json.loads(cart_cookie) if cart_cookie else []
-        cart = session.get('cart', [])
+    cart = session.get('cart', [])
 
-        # Add new item to cart with all necessary data
-        cart.append({
-            'menu_item': {
-                'name': menu_item_obj.item_name,
-                'price': float(menu_item_obj.price)
-            },
-            'buttery': buttery,
-            'quantity': quantity,
-            'note': note
-        })
+    # Add new item to cart with all necessary data
+    cart.append({
+        'menu_item': {
+            'name': menu_item_obj.item_name,
+            'price': float(menu_item_obj.price)
+        },
+        'buttery': buttery,
+        'quantity': quantity,
+        'note': note
+    })
 
-        # Create response with updated cart
-        html = render_template('u_cart_from_buttery.html',
-                               buttery=buttery,
-                               cart=cart)
-        response = make_response(html)
-        session['cart'] = cart
-        return response
-
-    except Exception as e:
-        return "Error adding item to cart", 500
+    # Create response with updated cart
+    html = render_template('u_cart.html', cart=cart)
+    response = make_response(html)
+    session['cart'] = cart
+    return response
 
 #-----------------------------------------------------------------------
 
 @app.route('/u_cart', methods=['GET'])
 def u_cart():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
 
@@ -355,7 +355,6 @@ def u_cart():
 
 @app.route('/u_remove_from_cart', methods=['POST'])
 def u_remove_from_cart():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
@@ -368,27 +367,6 @@ def u_remove_from_cart():
         cart.pop(index)
 
     response = make_response(redirect(url_for('u_cart')))
-    session['cart'] = cart
-    return response
-
-#-----------------------------------------------------------------------
-
-@app.route('/u_remove_from_cart_from_buttery', methods=['POST'])
-def u_remove_from_cart_from_buttery():
-    if 'user_id' not in session:
-        return redirect(url_for('u_login'))
-    
-    index = int(request.form.get('index'))
-    buttery = request.form.get('buttery_name')
-
-    cart = session.get('cart', [])
-
-    # remove item if index is valid
-    if 0 <= index < len(cart):
-        cart.pop(index)
-
-    html = render_template('u_cart_from_buttery.html', buttery=buttery, cart=cart)
-    response = make_response(html)
     session['cart'] = cart
     return response
 

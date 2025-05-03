@@ -27,7 +27,7 @@
                     {% if item.menu_item and item.menu_item.price is defined %}
                         <div class="cart-item">
                             <h3>{{ item.menu_item.name }}</h3>
-                            <p>from {{ item.buttery }}</p>
+                            <p>from <a href="{{url_for('u_get_buttery_menu', buttery=item.buttery)}}">{{ item.buttery }}</a></p>
                             <!-- Added quantity adjustment form -->
                             <p>Quantity: 
                                 <form action="/u_update_quantity" method="post">
