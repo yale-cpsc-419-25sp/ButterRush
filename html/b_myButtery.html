@@ -25,16 +25,13 @@
             <div style="width: fit-content; flex: 1; padding: 10px 50px;" class="container"> 
                 <!-- it would be nice if we sort of used the same style as the user side buttery menu -->
 
-            {% for category, items in menuItems|groupby('category') %}
-            <br>
-            <h2>{{ category }}</h2>
-                {% for i in range(0, items|length, 3) %} 
+                {% for i in range(0, menuItems|length, 3) %} 
                 <div class="row row-cols-3">
                     {% for j in range(3) %}
-                    {% if i+j < items|length %}
+                    {% if i+j < menuItems|length %}
                     <div class="col" style="padding: 10px 5px 10px 5px; ">   <!-- style="border-style: solid; border-width: 2px; border-color: lightgray;" -->
                         <div style="padding: 5px; border-radius: 5px; box-shadow: 0px 0px 6px gray;">
-                            <a href="{{ url_for('b_display_item', item_id=itemIDs[i+j]) }}" style="padding-right:20px">{{items[i+j].item_name}}</a>
+                            <a href="{{ url_for('b_display_item', item_id=itemIDs[i+j]) }}" style="padding-right:20px">{{menuItems[i+j].item_name}}</a>
                             <br>
                             <br>
                         </div>
@@ -42,7 +39,6 @@
                     {% endif %}
                     {% endfor %}
                 </div>
-                {% endfor %}
                 {% endfor %}
                 <br> 
                 <form action="{{ url_for('b_create_item') }}" method="get">
