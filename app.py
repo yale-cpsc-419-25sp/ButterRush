@@ -131,9 +131,9 @@ def u_login():
     if 'user_id' in session:
         return redirect(url_for('u_butteries'))
 
-    username = request.cookies.get('username')  # Cookie for login attempt username
+    # username = request.cookies.get('username')  # Cookie for login attempt username
     html = render_template('u_login.html', 
-                         username=username,
+                         username="",
                          password="")
                          
     response = make_response(html)
