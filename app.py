@@ -396,7 +396,6 @@ def u_remove_from_cart_from_buttery():
 
 @app.route('/u_submit_order', methods=['POST'])
 def u_submit_order():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
 
@@ -406,38 +405,39 @@ def u_submit_order():
     if not cart:
         return redirect(url_for('u_cart'))
     
-    # Create new order
-    total_price = 0
-    buttery_name = cart[0]['buttery']  # Assuming all items from same buttery
-    buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
-    
-    new_order = Order(
-        user_id=user_id,
-        buttery_id=buttery.buttery_id,
-        total_price=0,  # Will update after adding items
-        status='pending'
-    )
-    db.session.add(new_order)
-    db.session.flush()  # Get order_id without committing
+    # Create order for each buttery in the cart
+    buttery_orders = {}
     
     # Add order items
     for item in cart:
+        # Add one new order for each buttery with ordered items
+        if item['buttery'] not in buttery_orders:
+            buttery = Buttery.query.filter_by(buttery_name=item['buttery']).first()
+            buttery_orders[item['buttery']] = Order(
+                user_id=user_id,
+                buttery_id=buttery.buttery_id,
+                total_price=0,
+                status='pending'
+            )
+            db.session.add(buttery_orders[item['buttery']])
+            db.session.flush()  # Get order_id without committing
+        
+        # Add item to its buttery's order
+        buttery_order = buttery_orders[item["buttery"]]
         menu_item = MenuItem.query.filter_by(item_name=item['menu_item']['name']).first()
         order_item = OrderItem(
-            order_id=new_order.order_id,
+            order_id=buttery_order.order_id,
             menu_item_id=menu_item.menu_item_id,
             quantity=item['quantity'],
             item_price=item['menu_item']['price'],
-            note=item.get('note', '')  # Add the note from cart item
+            note=item['note']
         )
-        total_price += item['menu_item']['price'] * item['quantity']
+        buttery_order.total_price += item['menu_item']['price'] * item['quantity']
         db.session.add(order_item)
-    
-    new_order.total_price = total_price
+
     db.session.commit()
     
     response = make_response(redirect(url_for('u_ordersIP')))
-    # response.set_cookie('cart', '', expires=0)  # Clear cart
     session.pop('cart', None)
     return response
 
