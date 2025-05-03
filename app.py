@@ -317,8 +317,9 @@ def u_add_to_cart():
         })
 
         # Create response with updated cart
-        response = make_response(redirect(url_for('u_cart')))
-        # response.set_cookie('cart', json.dumps(cart))
+        html = render_template('u_cart_from_buttery.html',
+                               buttery=buttery)
+        response = make_response(html)
         session['cart'] = cart
         return response
 
@@ -332,21 +333,6 @@ def u_cart():
     # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
-    
-    # cart_cookie = request.cookies.get('cart')
-    # if cart_cookie:
-    #     try:
-    #         cart = json.loads(cart_cookie)
-    #         # Filter out any invalid items from the cart
-    #         valid_cart = []
-    #         for item in cart:
-    #             if isinstance(item, dict) and 'menu_item' in item and item['menu_item']:
-    #                 valid_cart.append(item)
-    #         cart = valid_cart
-    #     except (json.JSONDecodeError, KeyError):
-    #         cart = []
-    # else:
-    #     cart = []
 
     cart = session.get('cart', [])
     if cart:
@@ -447,10 +433,6 @@ def u_ordersIP():
     # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
-    
-    # user_id = request.cookies.get('user_id')
-    # if not user_id:
-    #     return redirect(url_for('u_login'))
 
     # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
@@ -534,10 +516,6 @@ def b_login():
                            #password=password)
     response = make_response(html)
 
-    # response.set_cookie('username', username)
-    # response.set_cookie('password', password)
-    # session['username'] = username
-    # session['password'] = password
     return response
 
 #-----------------------------------------------------------------------
@@ -553,8 +531,6 @@ def b_login_submit():
     if (username.strip() == '' or password.strip() == ''):
         response = redirect(url_for('b_login'))
         flash('Username or password empty.', 'danger')
-        # response.set_cookie('error_msg', error_msg)
-        # session['error_msg'] = error_msg
 
     else:
         # Query the Buttery from database instead of using BUTTERY_PASSWORD_DB
@@ -564,28 +540,18 @@ def b_login_submit():
             response = redirect(url_for('b_login'))
             error_msg = 'Username not found. Create an account.'
             flash(error_msg, 'danger')
-            # response.set_cookie('error_msg', error_msg)
-            # session['error_msg'] = error_msg
 
         # TODO: Add proper password handling here
         elif not check_password_hash(buttery.password_hash, password):
             response = redirect(url_for('b_login'))
             error_msg = 'Password incorrect.'
             flash(error_msg, 'danger')
-            # response.set_cookie('error_msg', error_msg)
-            # session['error_msg'] = error_msg
 
         else:
             session['buttery_id'] = buttery.buttery_id
             return redirect(url_for('b_myButtery'))
-            # response.set_cookie('error_msg', '')
-            # error_msg = ''
-            # session['error_msg'] = error_msg
 
     response.set_cookie('buttery', username) 
-    # response.set_cookie('password', password)
-    # session['username'] = username
-    # session['password'] = password
 
     return response
 

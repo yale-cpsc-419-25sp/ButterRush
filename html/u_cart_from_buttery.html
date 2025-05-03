@@ -17,6 +17,11 @@
     <br>
     
     <div class="container-fluid">
+        <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
+            <button class="btn buttery-btn" type="submit" name="buttery" value="{{ buttery }}">{{ name }}
+            </button>
+        </form>
+
         <h2>Your Cart</h2>
         <!-- Cart content with empty state handling -->
         {% if cart %}
