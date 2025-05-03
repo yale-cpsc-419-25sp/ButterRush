@@ -19,12 +19,12 @@
             </div>  
             <div class="card-body p-2 mb-1"></div>
                 <div class="col-12 p-4">
-                        <form action="u_login" method="get">
+                        <form action="{{ url_for('u_login') }}" method="get">
                                 <div class="mb-5">
                                     <button type="submit" class="btn btn-dark w-100 p-2">Student</button>
                                 </div>
                         </form>
-                        <form action="b_login" method="get">
+                        <form action="{{ url_for('b_login') }}" method="get">
                             <div class="mb-3">
                                 <!-- change color -->
                                 <button type="submit" class="btn btn-dark w-100 p-2">Buttery</button>

@@ -113,7 +113,7 @@
                     <strong>Current hours:</strong> {{buttery.opening_hours if buttery.opening_hours else 'Not set'}}
                 </div>
                 
-                <form action="/b_update_hours" method="post">
+                <form action="{{ url_for('b_update_hours') }}" method="post">
                     <div class="form-group">
                         <label for="opening_hours">Update Opening Hours</label>
                         <input type="text" id="opening_hours" name="opening_hours"
@@ -130,7 +130,7 @@
                 </div>
             </div>
 
-            <form action="logout" method="get" class="logout-btn">
+            <form action="{{ url_for('logout') }}" method="get" class="logout-btn">
                 <input type="submit" value="Log out">
             </form>
 

@@ -14,7 +14,7 @@
     <br>
 
     <div class="menu-item">
-        <form action="u_get_buttery_menu" method="get">
+        <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
             <input type="hidden" name="buttery" value="{{ buttery }}">
             <input type="submit" class="btn btn-secondary" value="Back to {{ buttery }} Menu">
         </form>
@@ -35,7 +35,7 @@
                 {% endfor %}
             </ul>
     
-            <form action="/u_add_to_cart" method="post">
+            <form action="{{ url_for('u_add_to_cart') }}" method="post">
                 <input type="hidden" name="menu_item" value="{{ menu_item.item_name }}">
                 <input type="hidden" name="buttery" value="{{ buttery }}">
                 <label for="quantity">Quantity:</label>

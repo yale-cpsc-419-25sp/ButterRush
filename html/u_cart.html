@@ -30,7 +30,7 @@
                             <p>from <a href="{{url_for('u_get_buttery_menu', buttery=item.buttery)}}">{{ item.buttery }}</a></p>
                             <!-- Added quantity adjustment form -->
                             <p>Quantity: 
-                                <form action="/u_update_quantity" method="post">
+                                <form action="{{ url_for('u_update_quantity') }}" method="post">
                                     <input type="hidden" name="index" value="{{ loop.index0 }}">
                                     <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()">
                                     <button type="submit" class="btn btn-secondary">Update</button>
@@ -43,7 +43,7 @@
                                 <p>Note: {{ item.note }}</p>
                             {% endif %}
                             <!-- Added remove item form -->
-                            <form action="/u_remove_from_cart" method="post">
+                            <form action="{{ url_for('u_remove_from_cart') }}" method="post">
                                 <input type="hidden" name="index" value="{{ loop.index0 }}">
                                 <button type="submit" class="btn btn-danger mb-2">Remove</button>
                             </form>
@@ -60,7 +60,7 @@
                     </div>
 
                     <!-- Added order submission form with required fields -->
-                    <form action="/u_submit_order" method="post">
+                    <form action="{{ url_for('u_submit_order') }}" method="post">
                         <button type="submit" class="btn buttery-btn">Place Order</button>
                     </form>
                 {% endif %}
@@ -68,7 +68,7 @@
         {% else %}
             <!-- Empty cart state -->
             <p>Your cart is empty</p>
-            <a href="/u_butteries" class="btn buttery-btn">Browse Butteries</a>
+            <a href="{{ url_for('u_butteries') }}" class="btn buttery-btn">Browse Butteries</a>
         {% endif %}
     </div>
 </body>

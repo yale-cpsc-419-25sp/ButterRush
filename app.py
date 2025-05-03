@@ -21,7 +21,6 @@ auth = HTTPBasicAuth()
 
 # -----------------------------------------------------------------------
 
-
 @app.before_request
 def before_request():
     if not request.is_secure:
@@ -90,7 +89,7 @@ def home():
 # USER SIDE
 #-----------------------------------------------------------------------
 
-@app.route('/u_createAccount', methods=['GET', 'POST'])
+@app.route('/createaccount', methods=['GET', 'POST'])
 def u_createAccount():
     if request.method == "POST":
         username = request.form["uname"]
@@ -113,7 +112,7 @@ def u_createAccount():
 
         new_user = User(
             username=username,
-            password_hash=generate_password_hash(password),  # Should use proper hashing
+            password_hash=generate_password_hash(password),
             email=email,
         )
         db.session.add(new_user)
@@ -121,55 +120,27 @@ def u_createAccount():
         
         # Redirect to login page with success message
         response = make_response(redirect(url_for('u_login')))
-        # session['success_msg'] = 'Account created successfully! Please log in.'
         flash("Account created successfully! Please log in.", 'success')
         return response
     
     return render_template('u_createAccount.html')
 
-#-----------------------------------------------------------------------
 
-# ! apparently there is a Flask-Login extension that can handle this?
-# change this in future
-@app.route('/u_login', methods=['GET'])
+@app.route('/user/login', methods=['GET'])
 def u_login():
-    # error_msg = request.cookies.get('error_msg')
-    # error_msg = session.get('error_msg', None)
-    # if error_msg is None:
-    #     error_msg = ''
-    # Get success message from session
-    # success_msg = session.get('success_msg', None)
-    # if success_msg is not None:
-    #     # Clear the success message after displaying it
-    #     session.pop('success_msg', None)
-
-    # remember the user
-    # username = request.cookies.get('username')
-    # username = session.get('username', None)
-    # if username is None:
-    #     username = ''
-
-    # password = session.get('password', None)
-    # if password is None:
-    #     password = ''
-
     if 'user_id' in session:
         return redirect(url_for('u_butteries'))
 
     username = request.cookies.get('username')  # Cookie for login attempt username
     html = render_template('u_login.html', 
                          username=username,
-                         password="")#password)                         #error_msg=error_msg,
-                         #success_msg=success_msg,
+                         password="")
                          
     response = make_response(html)
-    # session['username'] = username
-    # session['password'] = password
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_login_submit', methods=['GET'])   # could this just be done in u_login?
+@app.route('/user/login/submit', methods=['GET'])
 def u_login_submit():
     username = request.args.get('uname')
     password = request.args.get('pword')
@@ -178,8 +149,6 @@ def u_login_submit():
         response = redirect(url_for('u_login'))
         response.set_cookie('username', username)
         flash('Username and password cannot be empty.', 'danger')
-        # response.set_cookie('error_msg', 'Username or password empty.')
-        # session['error_msg'] = 'Username or password empty.'
         return response
 
     user = User.query.filter_by(username=username).first()
@@ -187,17 +156,13 @@ def u_login_submit():
     if not user:
         response = redirect(url_for('u_login'))
         response.set_cookie('username', username)
-        # session['error_msg'] = 'Username not found.'
         flash('Username not found.', 'danger')
-        # response.set_cookie('error_msg', 'Username not found.')
         return response
 
-    if not check_password_hash(user.password_hash, password):  # Should use proper password verification
+    if not check_password_hash(user.password_hash, password):
         response = redirect(url_for('u_login'))
         response.set_cookie('username', username)
         flash("Incorrect password", 'danger')
-        # session['error_msg'] = 'Incorrect password.'
-        # response.set_cookie('error_msg', 'Incorrect password.')
         return response
 
     # Update last login
@@ -205,17 +170,13 @@ def u_login_submit():
     db.session.commit()
 
     response = make_response(redirect(url_for('u_butteries')))
-    # response.set_cookie('user_id', str(user.user_id))
-    # response.set_cookie('u_username', username)
     session['user_id'] = str(user.user_id)
     session['u_username'] = username
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_butteries', methods=['GET'])  
+@app.route('/user/butteries', methods=['GET'])  
 def u_butteries():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
@@ -227,9 +188,8 @@ def u_butteries():
                          butteries=[b.buttery_name for b in butteries],
                          username=username)
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_get_buttery_menu', methods=['GET'])
+@app.route('/user/getbutterymenu', methods=['GET'])
 def u_get_buttery_menu():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
@@ -251,11 +211,9 @@ def u_get_buttery_menu():
                          menuItems=menu_items,
                          opening_hours=buttery.opening_hours)
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_display_item', methods=['GET'])
+@app.route('/user/item', methods=['GET'])
 def u_display_item():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
@@ -284,9 +242,8 @@ def u_display_item():
                          menu_item=menu_item,  # Pass the entire menu_item object
                          buttery=buttery)
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_add_to_cart', methods=['POST'])
+@app.route('/user/cart/add', methods=['POST'])
 def u_add_to_cart():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
@@ -328,9 +285,8 @@ def u_add_to_cart():
     session['cart'] = cart
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_cart', methods=['GET'])
+@app.route('/user/cart', methods=['GET'])
 def u_cart():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
@@ -351,9 +307,8 @@ def u_cart():
     
     return render_template('u_cart.html', cart=cart)
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_remove_from_cart', methods=['POST'])
+@app.route('/user/cart/remove', methods=['POST'])
 def u_remove_from_cart():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
@@ -370,9 +325,8 @@ def u_remove_from_cart():
     session['cart'] = cart
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_submit_order', methods=['POST'])
+@app.route('/user/cart/order', methods=['POST'])
 def u_submit_order():
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
@@ -419,15 +373,9 @@ def u_submit_order():
     session.pop('cart', None)
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_ordersIP', methods=['GET'])  
+@app.route('/user/orders', methods=['GET'])  
 def u_ordersIP():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
-    if 'user_id' not in session:
-        return redirect(url_for('u_login'))
-
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     user_id = session.get('user_id')
@@ -464,56 +412,53 @@ def u_ordersIP():
     
     return render_template('u_ordersIP.html', orders=formatted_orders)
 
-#-----------------------------------------------------------------------
 
-@app.route('/u_account', methods=['GET'])  
+@app.route('/user/account', methods=['GET'])  
 def u_account():
-    # TODO: Should we check for 'user_id' or 'u_username' or sth else?
     if 'user_id' not in session:
         return redirect(url_for('u_login'))
     
     html = render_template('u_account.html', username=session.get('u_username'))
-    # html = render_template('u_account.html', username=request.cookies.get('u_username'))
     response = make_response(html)
     
     return response
+
+
+@app.route('/user/cart/updatequantity', methods=['POST'])
+def u_update_quantity():
+    index = int(request.form.get('index'))
+    new_quantity = int(request.form.get('quantity'))
+    
+    cart = session.get('cart', [])
+    
+    # Update quantity if index is valid
+    if 0 <= index < len(cart):
+        cart[index]['quantity'] = new_quantity
+    
+    response = make_response(redirect(url_for('u_cart')))
+    session['cart'] = cart
+    return response
+
 
 #-----------------------------------------------------------------------
 # BUTTERY SIDE
 #-----------------------------------------------------------------------
 
-@app.route('/b_login', methods=['GET'])
+@app.route('/buttery/login', methods=['GET'])
 def b_login():
-
-    # error_msg = request.cookies.get('error_msg')
-    # error_msg = session.get('error_msg', None)
-    # if error_msg is None:
-    #     error_msg = ''
-
     # remember the user
     if session.get('buttery_id') is not None:
         return redirect(url_for('b_myButtery'))
     
     username = request.cookies.get('buttery')
-    # username = session.get('username', None)
-    # if username is None:
-    #     username = ''
 
-    # password = request.cookies.get('password')
-    # password = session.get('password', None)
-    # if password is None:
-    #     password = ''
-
-    html = render_template('b_login.html',# error_msg=error_msg,
-                           username=username)#,
-                           #password=password)
+    html = render_template('b_login.html', username=username)
     response = make_response(html)
 
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_login_submit', methods=['GET'])  
+@app.route('/buttery/login/submit', methods=['GET'])  
 def b_login_submit():
     username = request.args.get('uname')
     password = request.args.get('pword')
@@ -548,9 +493,8 @@ def b_login_submit():
 
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_myButtery', methods=['GET'])  
+@app.route('/buttery/menu', methods=['GET'])  
 def b_myButtery():
     buttery = get_current_buttery()
     if not buttery:
@@ -582,9 +526,8 @@ def b_myButtery():
 
     return response
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_display_item/<string:item_id>', methods=['GET', 'POST'])
+@app.route('/buttery/item/<string:item_id>', methods=['GET', 'POST'])
 def b_display_item(item_id):
     buttery = get_current_buttery()
     if not buttery:
@@ -619,7 +562,6 @@ def b_display_item(item_id):
     elif request.method == "POST":
         post_action = request.form.get('action')
         if post_action == "delete":
-            print("here")
             db.session.delete(menu_item)
             db.session.commit()
             return redirect(url_for('b_myButtery'))
@@ -644,9 +586,8 @@ def b_display_item(item_id):
             db.session.commit()
             return redirect(url_for('b_display_item', item_id=item_id))
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_edit_item_ingredients/<string:item_id>', methods=['GET', 'POST'])
+@app.route('/buttery/item/edit/<string:item_id>', methods=['GET', 'POST'])
 def b_edit_item_ingredients(item_id):
     buttery = get_current_buttery()
     if not buttery:
@@ -734,38 +675,10 @@ def b_edit_item_ingredients(item_id):
             
             return redirect(url_for('b_edit_item_ingredients', item_id=item_id))
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_delete_item', methods=['POST'])
-def b_delete_item():
-    buttery = get_current_buttery()
-    if not buttery:
-        return redirect(url_for('b_login'))
-    
-    menu_item_name = request.form.get('menu_item')
-    
-    # Get menu item from database
-    buttery = Buttery.query.filter_by(buttery_name=buttery.buttery_name).first()
-    menu_item = MenuItem.query.filter_by(
-        buttery_id=buttery.buttery_id,
-        item_name=menu_item_name).first()
-    
-    if not menu_item:
-        return "Menu item not found", 404 # change to error message and redirect back to buttery menu
-    
-    item_ingredients = MenuItemIngredient.query.filter_by(menu_item_id=menu_item.menu_item_id).all()
-    for item in item_ingredients:
-        db.session.delete(item)
-        
-    db.session.delete(menu_item)
-    db.session.commit()
-    return redirect(url_for('b_myButtery'))
-
-#-----------------------------------------------------------------------
-
-@app.route('/b_create_item', methods=['GET', 'POST'])
+@app.route('/buttery/createitem', methods=['GET', 'POST'])
 def b_create_item():
-    buttery = get_cirrent_buttery()
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
@@ -823,9 +736,8 @@ def b_create_item():
             
             return redirect(url_for('b_edit_item_ingredients', item_id=new_item.menu_item_id))
     
-#-----------------------------------------------------------------------
-
-@app.route('/b_orderQueue', methods=['GET']) 
+    
+@app.route('/buttery/queue', methods=['GET']) 
 def b_orderQueue():
     buttery = get_current_buttery()
     if not buttery:
@@ -892,7 +804,7 @@ async def send_email(email, message):
     asyncio.to_thread(send())
 
 
-@app.route('/b_update_order_status', methods=['POST'])
+@app.route('/buttery/queue/updatestatus', methods=['POST'])
 def b_update_order_status():
     buttery = get_current_buttery()
     if not buttery:
@@ -916,9 +828,8 @@ def b_update_order_status():
     
     return redirect(url_for('b_orderQueue'))
 
-#-----------------------------------------------------------------------
 
-@app.route('/b_account', methods=['GET']) 
+@app.route('/buttery/account', methods=['GET']) 
 def b_account():
     buttery = get_current_buttery()
     if not buttery:
@@ -931,7 +842,8 @@ def b_account():
     
     return response
 
-@app.route('/b_update_hours', methods=['POST'])
+
+@app.route('/buttery/account/updatehours', methods=['POST'])
 def b_update_hours():
     buttery = get_current_buttery()
     if not buttery:
@@ -944,35 +856,8 @@ def b_update_hours():
     
     return redirect(url_for('b_account'))
 
-#-----------------------------------------------------------------------
-
-@app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
-def logout():
-    # clear session
-    html = redirect(url_for("home"))
-    response = make_response(html)
-    session.clear()
-    
-    return response
-
-
-@app.route('/u_update_quantity', methods=['POST'])
-def u_update_quantity():
-    index = int(request.form.get('index'))
-    new_quantity = int(request.form.get('quantity'))
-    
-    cart = session.get('cart', [])
-    
-    # Update quantity if index is valid
-    if 0 <= index < len(cart):
-        cart[index]['quantity'] = new_quantity
-    
-    response = make_response(redirect(url_for('u_cart')))
-    session['cart'] = cart
-    return response
-
 # allows checked items to persist when order status is updated
-@app.route('/b_update_item_check', methods=['POST'])
+@app.route('/buttery/menu/updateitemcheck', methods=['POST'])
 def b_update_item_check():
     data = request.get_json()
     
@@ -993,7 +878,7 @@ def b_update_item_check():
     return '', 200
 
 # toggles when item is OOS
-@app.route('/b_toggleIngredientOOS', methods=['POST'])
+@app.route('/buttery/toggleoutofstock', methods=['POST'])
 def b_toggleIngredientOOS():
     buttery = get_current_buttery()
     if not buttery:
@@ -1012,7 +897,6 @@ def b_toggleIngredientOOS():
     # print("hi: ", oos, set_unavailable)
 
     if oos is not None and not set_unavailable: # need this check for oos so we don't delete something that doesn't exist
-        # print("DELETING FROM OOS")
         db.session.delete(oos)
         db.session.commit()
 
@@ -1050,3 +934,14 @@ def b_toggleIngredientOOS():
         db.session.commit()
     
     return '', 200
+
+#-----------------------------------------------------------------------
+
+@app.route('/logout', methods=['GET'])  # ! should we separate user and buttery logout
+def logout():
+    # clear session
+    html = redirect(url_for("home"))
+    response = make_response(html)
+    session.clear()
+    
+    return response

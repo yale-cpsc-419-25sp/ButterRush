@@ -33,7 +33,7 @@
                 {% endif %}
             {% endwith %}
 
-            <form action="u_login_submit" method="get">
+            <form action="{{ url_for('u_login_submit') }}" method="get">
                 <!-- Email Component -->
                 <div class="mb-3">
                     <label for="uname" class="form-label">Student name:</label>
@@ -55,7 +55,7 @@
             <!-- Optional Sign-up -->
             <p class="text-center text-muted mt-3 mb-3">
                 Don't have an account?
-                <a href="/u_createAccount" class="text-dark fw-semibold">Sign Up</a>
+                <a href="{{ url_for('u_createAccount') }}" class="text-dark fw-semibold">Sign Up</a>
             </p>
             <!-- Return Back -->
             <a href="/" class="btn btn-secondary ">Go back</a>

@@ -37,7 +37,7 @@
             </div>
             {% endfor %}
             <br> 
-            <form action="b_create_item" method="get">
+            <form action="{{ url_for('b_create_item') }}" method="get">
                 <input type="submit" name="create_item" class="btn buttery-btn" value="Create new menu item">
             </form>
         </div>

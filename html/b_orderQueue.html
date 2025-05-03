@@ -107,7 +107,7 @@
                                         <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
                                     </p>
                                     
-                                    <form action="/b_update_order_status" method="post" class="status-form">
+                                    <form action="{{ url_for('b_update_order_status') }}" method="post" class="status-form">
                                         <input type="hidden" name="order_id" value="{{order.id}}">
                                         <input type="hidden" name="status" value="ready">
                                         <button type="submit" class="btn buttery-btn">Mark as Ready</button>
@@ -153,7 +153,7 @@
                                         <strong>Total: ${{"{:.2f}".format(order.total_price)}}</strong>
                                     </p>
                                     
-                                    <form action="/b_update_order_status" method="post" class="status-form">
+                                    <form action="{{ url_for('b_update_order_status') }}" method="post" class="status-form">
                                         <input type="hidden" name="order_id" value="{{order.id}}">
                                         <input type="hidden" name="status" value="picked up">
                                         <button type="submit" class="btn buttery-btn">Picked Up</button>

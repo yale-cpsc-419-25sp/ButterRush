@@ -87,11 +87,6 @@
 
 <body class="alt">
     {% include "b_navbar.html" %}
-    <!-- <div class="header">
-        <a href="/b_myButtery">My buttery</a>
-        <a href="/b_orderQueue">Order queue</a>
-        <a href="/b_account">Account</a>
-    </div> -->
     <br>
     <div class="main-content">
         <div class="container">
@@ -99,7 +94,7 @@
             
             <div class="card">
                 <h3>Item Details</h3>
-                <form id="create_item_form" action="b_create_item" method="post">
+                <form id="create_item_form" action="{{ url_for('b_create_item') }}" method="post">
                     <input type="hidden" name="action" value="create_item"/>
                     
                     <div class="form-group">
