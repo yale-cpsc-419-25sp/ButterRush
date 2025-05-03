@@ -50,7 +50,7 @@ Final Project Presentation Slides: https://docs.google.com/presentation/d/1wnze7
 
 ButterRush is hosted (https://butterrushyale.pythonanywhere.com/), but you can find instructions to run the application locally below: 
 
-To run ButterRush, do `pip install -r requirements.txt`. 
+To run ButterRush locally, do `pip install -r requirements.txt`. 
 Then, delete the current database if it is present (which would be named `butterrush.db`) and run `python init_db.py` to initalize the database.
 Then, `python runserver.py [a valid port number]`.
 
@@ -62,8 +62,6 @@ Example User Login:
 username: “ayak” 
 password: “12345678”
 *NOTE: You may have to first create an account in order to login as a user.*
-
-Changing opening hours is a feature available in the Account tab on the buttery side
 
 Issues to Address/Implement in the Future: 
 - Implement an opt-in leaderboard to rank users with the most orders
