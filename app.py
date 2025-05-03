@@ -243,7 +243,6 @@ def u_get_buttery_menu():
     buttery_name = request.args.get('buttery')
     buttery = Buttery.query.filter_by(buttery_name=buttery_name).first()
     
-    # Remove is_available filter for now
     menu_items = MenuItem.query.filter_by(
         buttery_id=buttery.buttery_id,
         is_available=True
@@ -605,19 +604,25 @@ def b_myButtery():
     
     # Get all available menu items for this buttery
     menu_items = MenuItem.query.filter_by(
-        buttery_id=buttery.buttery_id,
-        is_available=True
+        buttery_id=buttery.buttery_id
+        # is_available=True
     ).all()
 
     # Get all ingredients of menu items for this buttery
-    # ! we could limit to the ingredients used just by this buttery
-    ingredients = [ingredient for ingredient in Ingredient.query.all()]
+    # also get whether or not they are available
+    ing_and_avail = []
+    ingredients = Ingredient.query.all()
+    for ing in ingredients:
+        if OOSIngredient.query.filter_by(ingredient_id=ing.ingredient_id, buttery_id=buttery.buttery_id).first():
+            ing_and_avail.append((ing, False)) # False = not available
+        else:
+            ing_and_avail.append((ing, True))
     
     html = render_template('b_myButtery.html', 
                          buttery=buttery.buttery_name,
                          menuItems=menu_items,
                          itemIDs=[item.menu_item_id for item in menu_items],
-                         ingredients=ingredients,
+                         ingredients=ing_and_avail,
                          buttery_id=buttery.buttery_id)
     response = make_response(html)
 
@@ -1054,7 +1059,10 @@ def b_toggleIngredientOOS():
     set_unavailable = data.get('set_unavailable')
 
     oos = OOSIngredient.query.filter_by(ingredient_id=ingredient_id, buttery_id=buttery_id).first()
-    if oos and not set_unavailable:
+    # print(oos, set_unavailable)
+
+    if oos is not None and not set_unavailable: # need this check for oos so we don't delete something that doesn't exist
+        # print("DELETING FROM OOS")
         db.session.delete(oos)
         db.session.commit()
 
@@ -1066,7 +1074,6 @@ def b_toggleIngredientOOS():
 
         for menu_item in menu_items:
             available = True
-
             for ingredient in menu_item.ingredients: # only make reappear if rest of ingredients also in stock
                 if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
                     available = False
@@ -1076,6 +1083,7 @@ def b_toggleIngredientOOS():
         db.session.commit()
 
     elif oos is None and set_unavailable:
+        # print("ADDING TO OOS")
         new_oos = OOSIngredient(ingredient_id=ingredient_id, buttery_id=buttery_id)
         db.session.add(new_oos)
         db.session.commit()
