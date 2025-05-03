@@ -765,7 +765,7 @@ def b_delete_item():
 
 @app.route('/b_create_item', methods=['GET', 'POST'])
 def b_create_item():
-    buttery = get_cirrent_buttery()
+    buttery = get_current_buttery()
     if not buttery:
         return redirect(url_for('b_login'))
     
@@ -1017,19 +1017,19 @@ def b_toggleIngredientOOS():
         db.session.commit()
 
         # now, need to make corresponding menu items reappear
-        # ! am not differentiating by buttery id here
         menu_item_ingreds = MenuItemIngredient.query.filter_by(ingredient_id=ingredient_id).all()
         menu_item_ingreds_ids = [menu_item_ingred.menu_item_id for menu_item_ingred in menu_item_ingreds]
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            available = True
-            for ingredient in menu_item.ingredients: # only make reappear if rest of ingredients also in stock
-                if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
-                    available = False
-                    break
-            
-            menu_item.is_available = available
+            if menu_item.buttery_id == buttery_id:
+                available = True
+                for ingredient in menu_item.ingredients: # only make reappear if rest of ingredients also in stock
+                    if OOSIngredient.query.filter_by(ingredient_id=ingredient.ingredient_id, buttery_id=buttery_id).first():
+                        available = False
+                        break
+                
+                menu_item.is_available = available
 
         db.session.commit()
 
@@ -1045,7 +1045,8 @@ def b_toggleIngredientOOS():
         menu_items = MenuItem.query.filter(MenuItem.menu_item_id.in_(menu_item_ingreds_ids)).all()
 
         for menu_item in menu_items:
-            menu_item.is_available = False
+            if menu_item.buttery_id == buttery_id:
+                menu_item.is_available = False
 
         db.session.commit()
     
