@@ -39,7 +39,6 @@ Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/Butte
 - Improved and consistent UI through all parts of app
 - Finishing touches, handling edge cases, and last minute bugs
 Extra: 
-- Limit items available to order based on ingredient availability
 - Hashing passwords
 - Logo Creation
 - Application hosted online via pythonanywhere.com
