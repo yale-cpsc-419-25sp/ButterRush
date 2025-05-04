@@ -2,11 +2,9 @@
 Sophia Zhou, Aya Kasim, Sivan Almogy, Sebastian Orozco, Emma Slagle
 
 ## Project Description:
-
 Our web app ButterRush, allows individuals to order ahead from the Yale buttery locations and receive a notification when their order is ready for pick-up. Our application is composed of both a user side and a buttery side. Users are able to create an account, can browse buttery menus, add menu items to cart, place orders, see the status of their order (if ready for pick-up), and log out. On the buttery side, buttery workers can log-into their buttery account, can edit their buttery menu, see their order queue from customers, mark orders as ready for pick-up, and log out. When a user’s order is ready for pick-up, users make their way to the respective buttery to pay there. 
 
 ## What we’ve implemented (MVP): 
-
 - Simple User UI: Butteries, Orders In Progress, Cart, Account
 - Order items off of a fixed menu + optional descriptional notes for each menu item
 - Simple Buttery UI: My Buttery, Order Queue, Account
@@ -37,9 +35,20 @@ Alpha Figma Wireframe: https://www.figma.com/design/uW76eWa8seOk0Rx3qsZXxy/Butte
 - Bug fixes: email, order queue
 - Feature that allows butteries to mark ingredients as in or out of stock 
 
+## What we’ve implemented (Final): 
+- Improved and consistent UI through all parts of app
+- Finishing touches, handling edge cases, and last minute bugs
+Extra: 
+- Limit items available to order based on ingredient availability
+- Hashing passwords
+- Logo Creation
+- Application hosted online via pythonanywhere.com
+
+Final Project Presentation Slides: https://docs.google.com/presentation/d/1wnze7YMh7VBBpY97fzZGxTK5KZnztZYfot0HKYbvXh8/edit?usp=sharing 
+
 ## Implementation Instructions: 
 
-*NOTE: This is optional, but in order to send emails you must set `MAIL_USERNAME` and `MAIL_PASSWORD` in your terminal. This requires setting up an app password to login to your email account. To do this, please follow the instructions from your email service provider (likely found within the "Security" section of your email account settings). After accomplishing this, please run `export MAIL_USERNAME="[your_email]"` and `export MAIL_PASSWORD="[your_email_app_password]"` to set the necessary environment variables. In the future, we will use a standard ButterRush address from which to send emails, so this is a temporary solution.*
+ButterRush is hosted (https://butterrushyale.pythonanywhere.com/), but you can find instructions to run the application locally below: 
 
 To run ButterRush, do `pip install -r requirements.txt`. 
 Then, delete the current database if it is present (which would be named `butterrush.db`) and run `python init_db.py` to initalize the database.
@@ -57,5 +66,8 @@ password: “12345678”
 Changing opening hours is a feature available in the Account tab on the buttery side
 
 Issues to Address/Implement in the Future: 
-
-- Any bugs that we find! 
+- Implement an opt-in leaderboard to rank users with the most orders
+- Updating tech stack for a more scalable application, as well as expanding to mobile
+- Prevent user access to ordering outside of buttery hours
+- Updating menus to reflect the unique menus of each residential buttery
+- Switching from email notifications to text messaging!
