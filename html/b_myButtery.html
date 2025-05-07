@@ -1,0 +1,88 @@
+{% extends "global_template.html" %}
+{% block title %}My Buttery{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}alt{% endblock %}
+{% block body %}  
+    {% include "b_navbar.html" %}
+
+    <h1 style="padding: 5px 20px">{{buttery}}</h1>
+    <br>
+
+    <div style="display: flex; padding: 1px 20px;">
+        <div style="width: fit-content; flex: 1; padding: 10px 50px;" class="container"> 
+            {% for i in range(0, menuItems|length, 3) %} 
+                <div class="row row-cols-3">
+                    {% for j in range(3) %}
+                        {% if i+j < menuItems|length %}
+                            <div class="col" style="padding: 10px 5px 10px 5px; ">   <!-- style="border-style: solid; border-width: 2px; border-color: lightgray;" -->
+                                <div style="padding: 5px; border-radius: 5px; box-shadow: 0px 0px 6px gray;">
+                                    <a href="{{ url_for('b_display_item', item_id=itemIDs[i+j]) }}" style="padding-right:20px">{{menuItems[i+j].item_name}}</a>
+                                    <br/>
+                                    <br/>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <br/> 
+            <form action="{{ url_for('b_create_item') }}" method="get">
+                <input type="submit" name="create_item" class="btn buttery-btn" value="Create new menu item">
+            </form>
+        </div>
+
+        <!-- ingredient list that the buttery can mark as out of stock -->
+        <div class="ingredientList" style="width: 30%; float: right; ">
+            <p>Mark ingredients below as out of stock/not in use.</p>
+
+            <table style="text-align: center; margin: auto;">
+                <thead>
+                    <tr>
+                        <th>Ingredients</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for ing, avail in ingredients %}
+                        <tr>
+                            
+                            <!-- on page reload -->
+                            {% if avail %}
+                                <td id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                            {% else %}
+                                <td class="outOfStock" id="{{ing.ingredient_id}}" onclick="ingredOutOfStock('{{ing.ingredient_id}}', '{{buttery_id}}')">{{ing.ingredient_name}}</td>
+                            {% endif %}
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- maybe standardize how we are calling ajax -->
+    <script src=
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">
+    </script>
+
+    <script>
+        'use strict';
+
+        let request = null; // needs to go after handleResponse
+
+        function ingredOutOfStock(ingredientId, butteryId) {
+            let element = document.getElementById(ingredientId);
+            element.classList.toggle("outOfStock");
+            
+            let url = "{{ url_for('b_toggleIngredientOOS') }}"
+
+            request = $.ajax({
+            type: 'POST',
+            url: url,
+            data: JSON.stringify({ingredient_id: ingredientId, buttery_id: butteryId, set_unavailable: element.classList.contains("outOfStock")}), // ! this could be incredibly not optimal! 
+            contentType: 'application/json'
+            });
+        }
+    </script>
+{% endblock %}

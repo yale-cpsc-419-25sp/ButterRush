@@ -1,0 +1,59 @@
+{% extends "global_template.html" %}
+{% block title %}{{ buttery }} Menu{% endblock %}
+{% block head %}
+    <style>
+        .menu-item {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        max-width: 500px;
+        }
+    </style>
+{% endblock %}
+{% block body_class %}{% endblock %}
+{% block body %}  
+    {% include "_navbar.html" %}
+
+    <div class="buttery-menu">
+        <h1>{{ buttery }}</h1>
+        {% if opening_hours %}
+            <p>Opening Hours: {{ opening_hours }}</p>
+        {% endif %}
+    
+        {% if not menuItems %}
+            <p>No menu items available at this time.</p>
+        {% else %}
+            <!-- Group menu items by category -->
+            {% for category, items in menuItems|groupby('category') %}
+                <h2>{{ category }}</h2>
+                <div class="menu-category container">
+                    
+                    {% for i in range(0, items|length, 3) %}
+                        <div class="row row-cols-3">
+                            
+                            {% for j in range(3) %}
+                                {% if i+j < items|length %}
+                                <div class="col">
+                                    <div class="menu-item" style="padding: 20px 20px; border-style: solid; border-width: 2px; border-color: gainsboro;">
+                                        <h3>{{ items[i+j].item_name }}</h3>
+                                        {% if items[i+j].description %}
+                                            <p>{{ items[i+j].description }}</p>
+                                        {% endif %}
+                                        <p>Price: ${{ "%.2f"|format(items[i+j].price) }}</p>
+                                        <form action="{{ url_for('u_display_item') }}" method="get">
+                                            <input type="hidden" name="menu_item" value="{{ items[i+j].item_name }}">
+                                            <input type="hidden" name="buttery" value="{{ buttery }}">
+                                            <button type="submit" class="btn buttery-btn">View Details</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

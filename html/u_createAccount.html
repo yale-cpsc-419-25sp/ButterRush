@@ -1,0 +1,66 @@
+{% extends "global_template.html" %}
+{% block title %}Create User Account{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}d-flex align-items-center justify-content-center min-vh-100{% endblock %}
+{% block body %}  
+    <div class="card shadow rounded-4 w-100" style="max-width: 400px;">
+        <div class="card">
+            <div class="card-header text-center p-4">
+                <h1>Create Account</h1>
+                <p class="mb-0 small">Please fill in your details to create a new account</p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <!-- Error message display with red color -->
+            {% if message %}
+                <p class="small text-danger">{{ message }}</p>
+            {% endif %}
+
+            <form action="" method="post">
+                <!-- Username Component -->
+                <div class="mb-3">
+                    <label for="uname" class="form-label">Username:</label>
+                    <input type="text" class="form-control" name="uname" required minlength="3" maxlength="80">
+                </div>
+
+                <!-- Email Component -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" name="email" required>
+                </div>
+
+                <!-- Password Component -->
+                <div class="mb-3 position-relative">
+                    <label for="pword" class="form-label">Password:</label>
+                    <input type="password" class="form-control" name="pword" id="password" required minlength="8">
+                    <small class="text-muted">Password must be at least 8 characters long</small>
+                </div>
+
+                <!-- Confirm Password Component -->
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password:</label>
+                    <input type="password" class="form-control" name="confirm_password" required>
+                </div>
+
+                <!-- Password Toggle -->
+                <div class="mb-3 password-toggle">
+                    <input type="checkbox" onclick="toggleShowPwd()">
+                    <p>Show password</p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-dark w-100">Create Account</button>
+            </form>
+
+            <!-- Optional Login -->
+            <p class="text-center text-muted mt-3 mb-3">
+                Already have an account?
+                <a href="{{ url_for('u_login') }}" class="text-dark fw-semibold">Log In</a>
+            </p>
+            <!-- Return Back -->
+            <a href="/" class="btn btn-secondary">Go back</a>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
+{% endblock %}

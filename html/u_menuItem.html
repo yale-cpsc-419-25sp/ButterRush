@@ -1,0 +1,43 @@
+{% extends "global_template.html" %}
+{% block title %}{{menu_item.item_name}}{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}{% endblock %}
+{% block body %}  
+    {% include "_navbar.html" %}
+
+    <div class="menu-item">
+        <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
+            <input type="hidden" name="buttery" value="{{ buttery }}">
+            <input type="submit" class="btn btn-secondary" value="Back to {{ buttery }} Menu">
+        </form>
+        <br/>
+
+        <div class="menu-item-details">
+            <h2>{{ menu_item.item_name }}</h2>
+            {% if menu_item.description %}
+                <p>{{ menu_item.description }}</p>
+            {% endif %}
+            <p>Price: ${{ "%.2f"|format(menu_item.price) }}</p>
+            
+            <h3>Ingredients:</h3>
+            <ul>
+                {% for ingredient in menu_item.ingredients %}
+                    <li>{{ ingredient.ingredient_name }}</li>
+                {% endfor %}
+            </ul>
+    
+            <form action="{{ url_for('u_add_to_cart') }}" method="post">
+                <input type="hidden" name="menu_item" value="{{ menu_item.item_name }}">
+                <input type="hidden" name="buttery" value="{{ buttery }}">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" value="1" min="1" max="10">
+                <br/>
+                <label for="note">Special Instructions:</label>
+                <textarea name="note" rows="2"></textarea>
+                <br/>
+                <br/>
+                <button type="submit" class="btn buttery-btn">Add to cart</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

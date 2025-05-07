@@ -1,0 +1,62 @@
+{% extends "global_template.html" %}
+{% block title %}Shopping Cart{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}{% endblock %}
+{% block body %}
+    {% include "_navbar.html" %}
+
+    <div class="container-fluid">
+        <h2>Your Cart</h2>
+        <!-- Cart content with empty state handling -->
+        {% if cart %}
+            <div class="cart-items">
+                <!-- Initialize total price tracker -->
+                {% set total = namespace(value=0) %}
+                {% for item in cart %}
+                    {% if item.menu_item and item.menu_item.price is defined %}
+                        <div class="cart-item">
+                            <h3>{{ item.menu_item.name }}</h3>
+                            <p>from <a href="{{url_for('u_get_buttery_menu', buttery=item.buttery)}}">{{ item.buttery }}</a></p>
+                            <!-- Quantity adjustment form -->
+                            <p>Quantity: 
+                                <form action="{{ url_for('u_update_quantity') }}" method="post">
+                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()">
+                                    <button type="submit" class="btn btn-secondary">Update</button>
+                                </form>
+                            </p>
+
+                            <p>Price: ${{ "%.2f"|format(item.menu_item.price * item.quantity|default(1)) }}</p>
+
+                            {% if item.note %}
+                                <p>Note: {{ item.note }}</p>
+                            {% endif %}
+
+                            <form action="{{ url_for('u_remove_from_cart') }}" method="post">
+                                <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                <button type="submit" class="btn btn-danger mb-2">Remove</button>
+                            </form>
+                            <!-- Update total price -->
+                            {% set total.value = total.value + (item.menu_item.price * item.quantity|default(1)) %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Display total price -->
+                {% if total.value > 0 %}
+                    <div class="cart-total">
+                        <h3>Total: ${{ "%.2f"|format(total.value) }}</h3>
+                    </div>
+
+                    <form action="{{ url_for('u_submit_order') }}" method="post">
+                        <button type="submit" class="btn buttery-btn">Place Order</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <!-- Empty cart state -->
+            <p>Your cart is empty</p>
+            <a href="{{ url_for('u_butteries') }}" class="btn buttery-btn">Browse Butteries</a>
+        {% endif %}
+    </div>
+{% endblock %}

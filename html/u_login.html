@@ -1,0 +1,52 @@
+{% extends "global_template.html" %}
+{% block title %}Student Login{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}d-flex align-items-center justify-content-center min-vh-100{% endblock %}
+{% block body %}  
+    <div class="card shadow rounded-4 w-100" style="max-width: 400px;">
+        <div class="card">
+            <div class="card-header text-center p-4">
+                <h1>Student Login</h1>
+                <p class="mb-0 small">Please sign in to your existing account</p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="small text-{{category}}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('u_login_submit') }}" method="get">
+                <!-- Email Component -->
+                <div class="mb-3">
+                    <label for="uname" class="form-label">Student name:</label>
+                    <input type="text" class="form-control" name="uname" value="{{username}}">
+                </div>
+                <!-- Password Component -->
+                <div class="mb-3 position-relative">
+                    <label for="pword" class="form-label">Student password:</label>
+                    <input type="password" class="form-control" name="pword" value="{{password}}" id="password">
+                </div>
+                <div class="mb-3 password-toggle">
+                    <input type="checkbox" onclick="toggleShowPwd()">
+                    <p>Show password</p>
+                </div>
+                <!-- Submit -->
+                <button type="submit" class="btn btn-dark w-100">Log In</button>
+            </form>
+
+            <!-- Optional Sign-up -->
+            <p class="text-center text-muted mt-3 mb-3">
+                Don't have an account?
+                <a href="{{ url_for('u_createAccount') }}" class="text-dark fw-semibold">Sign Up</a>
+            </p>
+            <!-- Return Back -->
+            <a href="/" class="btn btn-secondary ">Go back</a>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='toggle_password.js') }}"></script>
+{% endblock %}

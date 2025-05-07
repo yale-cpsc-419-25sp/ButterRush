@@ -1,0 +1,7 @@
+flask
+sqlalchemy
+flask_sqlalchemy
+yagmail
+keyring
+dotenv
+flask_httpauth

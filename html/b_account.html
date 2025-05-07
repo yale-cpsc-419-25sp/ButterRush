@@ -1,0 +1,41 @@
+{% extends "global_template.html" %}
+{% block title %}Buttery Account{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
+{% endblock %}
+{% block body_class %}alt{% endblock %}
+{% block body %}
+    {% include "b_navbar.html" %}
+    <div class="main-content">
+        <div class="container">
+            <h2>Account Settings</h2>
+            
+            <div class="card">
+                <h3>Opening Hours</h3>
+                <div class="info-item">
+                    <strong>Current hours:</strong> {{buttery.opening_hours if buttery.opening_hours else 'Not set'}}
+                </div>
+                
+                <form action="{{ url_for('b_update_hours') }}" method="post">
+                    <div class="form-group">
+                        <label for="opening_hours">Update Opening Hours</label>
+                        <input type="text" id="opening_hours" name="opening_hours"
+                               value="{{buttery.opening_hours}}" placeholder="e.g., 10PM-1AM">
+                    </div>
+                    <button type="submit">Update Hours</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Buttery Information</h3>
+                <div class="info-item">
+                    <strong>Name:</strong> {{buttery.buttery_name}}
+                </div>
+            </div>
+
+            <form action="{{ url_for('logout') }}" method="get" class="logout-btn">
+                <input type="submit" value="Log out">
+            </form>
+        </div>
+    </div>
+{% endblock %}

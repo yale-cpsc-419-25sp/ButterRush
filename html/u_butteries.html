@@ -1,0 +1,43 @@
+{% extends "global_template.html" %}
+{% block title %}Butteries{% endblock %}
+{% block head %}
+    <style>
+        .welcome-message {
+            color: #0d2d63;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+{% block body_class %}{% endblock %}
+{% block body %}  
+
+    {% include "_navbar.html" %}
+
+    <!-- Welcome message with username -->
+    <div class="welcome-message" style="padding: 10px 20px;">
+        <h2>Welcome, {{ username }}!</h2>
+        <p>Select a buttery to view its menu:</p>
+    </div>
+
+    <!-- list of butteries -->
+    <div class="container">
+        <!-- list of butteries -->
+        <div class="row row-cols-2 row-cols-md-6 g-3 text-center mb-5">
+          {% for name in butteries %}
+            <div class="col">
+            <!-- display buttery college crest -->
+                <img
+                    src="{{ url_for('static', filename='crests/' ~ name ~ '.png') }}"
+                    alt="{{ name }}"
+                    class="img-fluid mb-2"
+                    style="max-height: 100px; width: auto">
+                <!-- display button -->
+                    <form action="{{ url_for('u_get_buttery_menu') }}" method="get">
+                        <button class="btn buttery-btn" type="submit" name="buttery" value="{{ name }}">{{ name }}
+                        </button>
+                    </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

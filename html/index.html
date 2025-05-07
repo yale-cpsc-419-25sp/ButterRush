@@ -1,0 +1,33 @@
+{% extends "global_template.html" %}
+{% block title %}ButterRush{% endblock %}
+{% block head %}{% endblock %}
+{% block body_class %}d-flex align-items-center justify-content-center min-vh-100{% endblock %}
+{% block body %}  
+    <div class="card shadow rounded-4 w-100" style="max-width: 400px;">
+        <div class="card">
+            <div class="card-header yellow text-center p-4">
+                <p class="mb-0 small">Welcome to</p>
+                <h1>ButterRush</h1>
+                <img src="{{ url_for('static', filename='ButterRushLogo.png') }}"
+                    alt="ButterRush Logo"
+                    class="img-fluid mb-2"
+                    style="max-height: 100px; width: auto">
+                <p class="mb-0 small">Are you a student or buttery?</p>
+            </div>
+            <div class="card-body p-2 mb-1"></div>
+                <div class="col-12 p-4">
+                    <form action="{{ url_for('u_login') }}" method="get">
+                        <div class="mb-5">
+                            <button type="submit" class="btn btn-dark w-100 p-2">Student</button>
+                        </div>
+                    </form>
+                    <form action="{{ url_for('b_login') }}" method="get">
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-dark w-100 p-2">Buttery</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
